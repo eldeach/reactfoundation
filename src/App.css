@@ -36,3 +36,30 @@
     transform: rotate(360deg);
   }
 }
+
+
+/*======================= 로그인 페이지 =======================*/
+.loginPage
+{
+  padding:1px;
+  height: 100vh;
+  width:100vw;
+  background-image: url('./wallpaper/loginpage.webp');
+  background-position:center;
+  background-size: cover;
+  background-repeat: 'no-repeat';
+}
+
+.loginForm
+{
+  position:relative;
+  top:300px;
+  width:400px;
+  margin: auto;
+  padding:10px;
+}
+/*======================= 메인 페이지 =======================*/
+.Navbar
+{
+  width:100vw;
+}
