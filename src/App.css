@@ -58,6 +58,26 @@
   margin: auto;
   padding:10px;
 }
+/*======================= 계정생성 페이지 =======================*/
+.createAccountPage
+{
+  padding:1px;
+  height: 100vh;
+  width:100vw;
+  background-image: url('./wallpaper/loginpage.webp');
+  background-position:center;
+  background-size: cover;
+  background-repeat: 'no-repeat';
+}
+
+.createAccountForm
+{
+  position:relative;
+  top:300px;
+  width:90vw;
+  margin: auto;
+  padding:10px;
+}
 /*======================= 메인 페이지 =======================*/
 .Navbar
 {

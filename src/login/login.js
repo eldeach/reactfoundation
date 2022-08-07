@@ -39,6 +39,8 @@ function LoginForm(){
             }
             else if(res.data.flashMsg=="no user_account"){
                 alert("존재하지 않는 계정입니다.")
+            }else if(res.data.flashMsg=="no auth"){
+                alert("이 계정은 권한이 없습니다.")
             }
         }
 
@@ -65,9 +67,7 @@ function LoginForm(){
                     >
                         <Form.Control type="id" placeholder="Enter ID" name="id" value={id} onChange={handleIdChange}/>
                     </FloatingLabel>
-                </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formBasicPassword">
                     <FloatingLabel
                         controlId="floatingInputPassword"
                         label="Password"
@@ -76,6 +76,7 @@ function LoginForm(){
                         <Form.Control type="password" placeholder="Password" name="pw" value={pw} onChange={handlePwChange}/>
                     </FloatingLabel>
                 </Form.Group>
+
 
                 <Button variant="primary" type="submit" disabled={disabled}>
                     Login

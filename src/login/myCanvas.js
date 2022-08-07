@@ -34,7 +34,7 @@ function MyCanvas({ name, ...props }) {
               dispatch(setLoginStat(false))
               dispatch(setUserInfo({user_account : '', user_name : '로그인이 필요합니다.', user_auth : ["nothing"]}))
               handleClose()
-              }}>{rdx.loginUser.loginStat ? rdx.loginUser.userInfo.user_name + "님" : "로그인 해주세요"}</Button>
+              }}>{rdx.loginUser.loginStat ? rdx.loginUser.userInfo.user_name + "님 | 로그아웃" : "로그인 해주세요"}</Button>
             </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>

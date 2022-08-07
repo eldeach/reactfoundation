@@ -1,13 +1,12 @@
 import './App.css';
-import LoginForm from './login/login';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {  Routes, Route, useNavigate } from 'react-router-dom';
-import { Navbar, Container, NavDropdown, Nav} from 'react-bootstrap';
-
-
+import { Navbar, Container, NavDropdown, Nav, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from "react-redux"
-import MyCanvas from './login/myCanvas'
 
+import LoginForm from './login/login';
+import MyCanvas from './login/myCanvas'
+import CreateAccount from './login/createAccount';
 
 function App() {
   let rdx= useSelector((state)=>{return state});
@@ -35,7 +34,14 @@ function App() {
             <Nav.Link onClick={()=>{navigate("/item2-1")}}>item2-1</Nav.Link>
           </Nav>
           <MyCanvas key={0} placement={"end"} name={rdx.loginUser.loginStat ? rdx.loginUser.userInfo.user_name + "님" : "로그인"}/>
-
+          <Button variant="primary" size="sm" onClick={()=>{
+                if (rdx.loginUser.userInfo.user_auth.indexOf("ACCOUNT",0)!=-1){
+                  navigate("/createaccount")
+                }
+                else{
+                  alert("권한이 없습니다.")
+                }
+                }}>계정생성</Button>
         </Container>
       </Navbar>
 
@@ -46,6 +52,7 @@ function App() {
         }/>
         <Route path='/item1-1' element={ <div>item1-1</div> }/>
         <Route path='/item2-1' element={ <div>item2-1</div> }/>
+        <Route path='/createaccount' element={<CreateAccount/>}/>
         <Route path='/login' element={<LoginForm/>}/>
       </Routes>
       
