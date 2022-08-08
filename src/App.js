@@ -43,6 +43,42 @@ function App() {
         <Container>
           <Navbar.Brand onClick={()=>{navigate("/")}}>react foundation</Navbar.Brand>
           <Nav className="me-auto">
+            <NavDropdown title="계정관리" id="navbarScrollingDropdown">
+              <NavDropdown.Item onClick={()=>{
+                if (rdx.loginUser.userInfo.user_auth.indexOf("CREATEACCOUNT",0)!=-1){
+                  navigate("/createaccount")
+                }
+                else{
+                  alert("권한이 없습니다.")
+                }
+                }}>계정생성</NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item onClick={()=>{
+                if (rdx.loginUser.userInfo.user_auth.indexOf("AUTHMNG",0)!=-1){
+                  navigate("/authmng")
+                }
+                else{
+                  alert("권한이 없습니다.")
+                }
+                }}>권한부여</NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item onClick={()=>{
+                if (rdx.loginUser.userInfo.user_auth.indexOf("ACCOUNTVIEW",0)!=-1){
+                  navigate("/accountview")
+                }
+                else{
+                  alert("권한이 없습니다.")
+                }
+                }}>계정리스트</NavDropdown.Item>
+              <NavDropdown.Item onClick={()=>{
+                if (rdx.loginUser.userInfo.user_auth.indexOf("AUTHLIST",0)!=-1){
+                  navigate("/authlist")
+                }
+                else{
+                  alert("권한이 없습니다.")
+                }
+                }}>권한리스트</NavDropdown.Item>
+            </NavDropdown>
             <NavDropdown title="menu1" id="navbarScrollingDropdown">
               <NavDropdown.Item onClick={()=>{
                 if (rdx.loginUser.userInfo.user_auth.indexOf("item1-1",0)!=-1){
@@ -57,25 +93,18 @@ function App() {
             <Nav.Link onClick={()=>{navigate("/item2-1")}}>item2-1</Nav.Link>
           </Nav>
           <MyCanvas key={0} placement={"end"} name={rdx.loginUser.loginStat ? rdx.loginUser.userInfo.user_name + "님" : "로그인"}/>
-          <Button variant="primary" size="sm" onClick={()=>{
-                if (rdx.loginUser.userInfo.user_auth.indexOf("ACCOUNT",0)!=-1){
-                  navigate("/createaccount")
-                }
-                else{
-                  alert("권한이 없습니다.")
-                }
-                }}>계정생성</Button>
         </Container>
       </Navbar>
 
 
       <Routes>
-        <Route path='/' element={
-          rdx.loginUser.loginStat ? <div>home</div> : <LoginForm/>
-        }/>
+        <Route path='/' element={<div>home</div>}/>
+        <Route path='/createaccount' element={<CreateAccount/>}/>
+        <Route path='/authmng' element={<div>authmng</div>}/>
+        <Route path='/accountview' element={<div>accountview</div>}/>
+        <Route path='/authlist' element={<div>authlist</div>}/>
         <Route path='/item1-1' element={ <div>item1-1</div> }/>
         <Route path='/item2-1' element={ <div>item2-1</div> }/>
-        <Route path='/createaccount' element={<CreateAccount/>}/>
         <Route path='/login' element={<LoginForm/>}/>
       </Routes>
       

@@ -41,43 +41,54 @@
 /*======================= 로그인 페이지 =======================*/
 .loginPage
 {
-  padding:1px;
+  width: 100%;
   height: 100vh;
-  width:100vw;
-  background-image: url('./wallpaper/loginpage.webp');
-  background-position:center;
-  background-size: cover;
-  background-repeat: 'no-repeat';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: 300% 300%;
+  background-image: linear-gradient(
+        -45deg, 
+        rgba(59,173,227,1) 0%, 
+        rgba(87,111,230,1) 25%, 
+        rgba(152,68,183,1) 51%, 
+        rgba(255,53,127,1) 100%
+  );  
+  animation: AnimateBG 20s ease infinite;
 }
 
-.loginForm
-{
-  position:relative;
-  top:300px;
-  width:400px;
-  margin: auto;
-  padding:10px;
+@keyframes AnimateBG { 
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
+
+h1{
+  font-weight:bold;
+  font-size: 50px;
+}
+
+
 /*======================= 계정생성 페이지 =======================*/
 .createAccountPage
 {
-  padding:1px;
+  width: 100vw;
   height: 100vh;
-  width:100vw;
-  background-image: url('./wallpaper/loginpage.webp');
-  background-position:center;
-  background-size: cover;
-  background-repeat: 'no-repeat';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: 300% 300%;
+  background-image: linear-gradient(
+        -45deg, 
+        rgba(59,173,227,1) 0%, 
+        rgba(87,111,230,1) 25%, 
+        rgba(152,68,183,1) 51%, 
+        rgba(255,53,127,1) 100%
+  );  
+  animation: AnimateBG 20s ease infinite;
 }
 
-.createAccountForm
-{
-  position:relative;
-  top:300px;
-  width:90vw;
-  margin: auto;
-  padding:10px;
-}
+
 /*======================= 메인 페이지 =======================*/
 .Navbar
 {

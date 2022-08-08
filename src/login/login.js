@@ -1,4 +1,4 @@
-import { Form, FloatingLabel, Button } from 'react-bootstrap';
+import { Form, FloatingLabel, Button,Container,Row,Col    } from 'react-bootstrap';
 import axios from 'axios'
 import { useState } from 'react';
 import {  Routes, Route, useNavigate } from 'react-router-dom';
@@ -32,20 +32,21 @@ function LoginForm(){
         if (res.data.loginStat){
             dispatch(setLoginStat(res.data.loginStat))
             dispatch(setUserInfo(res.data.userInfo))
+            navigate("/")
         }
         else {
             if(res.data.flashMsg=="wrong PW"){
                 alert("비밀번호가 틀렸습니다.")
+                navigate("/login")
             }
             else if(res.data.flashMsg=="no user_account"){
                 alert("존재하지 않는 계정입니다.")
+                navigate("/login")
             }else if(res.data.flashMsg=="no auth"){
                 alert("이 계정은 권한이 없습니다.")
+                navigate("/login")
             }
         }
-
-        
-        navigate("/")
       }).catch((err)=>console.log(err))
 
    
@@ -58,30 +59,40 @@ function LoginForm(){
 
     return(
         <div className="loginPage">
-            <Form className="loginForm" onSubmit={handleSubmit}>
-                <Form.Group className="mb-3" controlId="formBasicID">
-                    <FloatingLabel
-                        controlId="floatingInputEnterID"
-                        label="Enter ID"
-                        className="mb-3 text-muted"
-                    >
-                        <Form.Control type="id" placeholder="Enter ID" name="id" value={id} onChange={handleIdChange}/>
-                    </FloatingLabel>
+            <Container>
+                <Row>
+                    <h1>react foundation Login</h1>
+                </Row>
+                <Row><div style={{height: "50px"}}></div></Row>
+                <Row>
+                    <Col/>
+                    <Col>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group className="mb-3" controlId="formBasicID">
+                                <FloatingLabel
+                                    controlId="floatingInputEnterID"
+                                    label="Enter ID"
+                                    className="mb-3 text-muted"
+                                >
+                                    <Form.Control type="id" placeholder="Enter ID" name="id" value={id} onChange={handleIdChange}/>
+                                </FloatingLabel>
 
-                    <FloatingLabel
-                        controlId="floatingInputPassword"
-                        label="Password"
-                        className="mb-3 text-muted"
-                    >
-                        <Form.Control type="password" placeholder="Password" name="pw" value={pw} onChange={handlePwChange}/>
-                    </FloatingLabel>
-                </Form.Group>
-
-
-                <Button variant="primary" type="submit" disabled={disabled}>
-                    Login
-                </Button>
-            </Form>
+                                <FloatingLabel
+                                    controlId="floatingInputPassword"
+                                    label="Password"
+                                    className="mb-3 text-muted"
+                                >
+                                    <Form.Control type="password" placeholder="Password" name="pw" value={pw} onChange={handlePwChange}/>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Button variant="primary" type="submit" disabled={disabled}>
+                                Login
+                            </Button>
+                        </Form>
+                    </Col>
+                    <Col/>
+                </Row>
+            </Container>
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import { Form, FloatingLabel, Button,Col,Row,InputGroup } from 'react-bootstrap';
+import { Form, FloatingLabel, Button,Col,Row,InputGroup, Container } from 'react-bootstrap';
 import axios from 'axios'
 import { useState } from 'react';
 import {  Routes, Route, useNavigate } from 'react-router-dom';
@@ -137,7 +137,7 @@ function CreateAccount(){
         <div className="createAccountPage">
         <Formik
         validationSchema={schema}
-        onSubmit={(values)=>{
+        onSubmit={(values, {resetForm})=>{
             let body = {
                 useraccount: values.useraccount,
                 pw: values.pw,
@@ -153,6 +153,7 @@ function CreateAccount(){
             axios.post("/createuseraccount",body).then(function(res){
                 console.log(res)
                 alert(`계정생성을 완료하였습니다. (${useraccount})`);
+                resetForm();
             }).catch((err)=>console.log(err))
         }}
         initialValues={{
@@ -178,95 +179,97 @@ function CreateAccount(){
         isValid,
         errors,
       }) =>(
-            <Form className="createAccountForm" noValidate onSubmit={handleSubmit}>
-                <Row>
-                    <Col sm={4}>
-                        <Form.Group className="mb-3" controlId="userid">
-                            <FloatingLabel controlId="floatingInputEnterID" label="Enter ID" className="mb-3 text-muted">  
-                                <Form.Control isValid={touched.useraccount && !errors.useraccount} isInvalid={touched.useraccount && errors.useraccount} onChange={e => { handleChange(e); handleUserAccountChange(e) }} onBlur={handleBlur} type="id" placeholder="Enter ID" name="useraccount" value={values.useraccount}/>
-                                <Form.Control.Feedback type="invalid">{errors.useraccount}</Form.Control.Feedback>
-                            </FloatingLabel>
-                            <Button variant="primary" disabled={dupCheckDisabled} onClick={()=>{
-                                setUniqueIdCheck(true)
-                                    let body={
-                                        useraccount : values.useraccount
-                                    }
-                                    axios.post('/duplicatedaccountCheck',body).then(async (v)=>{
-                                        console.log(v.data)
-                                        if(v.data<1)setUniqueId(true)
-                                        else setUniqueId(false)
-                                        setDupCheckDisabled(true);
-                                        await new Promise((r) => setTimeout(r, 1000));
-                                        setDupCheckDisabled(false);
-                                        validateField('useraccount')
-                                        console.log(uniqueId)
-                                    })
-                                }}>중복확인</Button>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="userpw">
-                            <FloatingLabel controlId="floatingInputPassword" label="Password" className="mb-3 text-muted">
-                                <Form.Control isValid={touched.pw && !errors.pw} isInvalid={touched.pw && errors.pw} onChange={handleChange} onBlur={handleBlur} type="password" placeholder="Password" name="pw" value={values.pw}/>
-                                <Form.Control.Feedback type="invalid">{errors.pw}</Form.Control.Feedback>
-                            </FloatingLabel>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="username">
-                            <FloatingLabel controlId="floatingUserName" label="User Name" className="mb-3 text-muted">
-                            <Form.Control isValid={touched.username && !errors.username} isInvalid={touched.username && errors.username} onChange={handleChange} onBlur={handleBlur} type="text"  placeholder="User Name" name="username" value={values.username}/>
-                            <Form.Control.Feedback type="invalid">{errors.username}</Form.Control.Feedback>
-                            </FloatingLabel>
-                        </Form.Group>
-                    </Col>
-                    <Col sm={8}>
-                        <Form.Group className="mb-3" controlId="userposition">
-                            <FloatingLabel controlId="floatingInputPosition" label="User Position" className="mb-3 text-muted">
-                                <Form.Control onChange={handleChange} type="text" placeholder="User Position" name="position" value={values.position}/>
-                            </FloatingLabel>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="userteam">
-                            <FloatingLabel controlId="floatingInputTeam" label="User Team" className="mb-3 text-muted">
-                                <Form.Control  isValid={touched.team && !errors.team} isInvalid={touched.team && errors.team} onChange={handleChange} onBlur={handleBlur} type="text" placeholder="User Team" name="team" value={values.team}/>
-                                <Form.Control.Feedback type="invalid">{errors.team}</Form.Control.Feedback>
-                            </FloatingLabel>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="usercompany">
-                            <FloatingLabel controlId="floatingCompany" label="User Company" className="mb-3 text-muted">
-                                <Form.Control onChange={handleChange} type="text" placeholder="User Company" name="company" value={values.company}/>
-                            </FloatingLabel>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="usermail">
-                            <FloatingLabel controlId="floatingEmail" label="User e-mail" className="mb-3 text-muted">
-                                <Form.Control isValid={touched.email && !errors.email} isInvalid={touched.email && errors.email} onChange={handleChange} onBlur={handleBlur} type="email" placeholder="User e-mail" name="email" value={values.email}/>
-                                <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
-                            </FloatingLabel>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="userphone">
-                            <FloatingLabel controlId="floatingPhone" label="User Phone Number" className="mb-3 text-muted">
-                                <Form.Control isInvalid={touched.phone && errors.phone} onChange={handleChange} onBlur={handleBlur} type="tel" placeholder="User Phone Numver" name="phone" value={values.phone}/>
-                                <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
-                            </FloatingLabel>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="userremark">
-                            <FloatingLabel controlId="floatingRemark" label="Remark" className="mb-3 text-muted">
-                                <Form.Control onChange={handleChange} as="textarea" rows={3} placeholder="Remark" name="remark" value={values.remark}/>
-                            </FloatingLabel>
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>    
-                    <Col sm={4}/> 
-                    <Col>                
-                        <Button variant="primary" type="submit">계정생성</Button>
-                    </Col>
-                    <Col>                
-                        <Button variant="danger" type="reset" onClick={()=>{resetForm()}} >초기화</Button>
-                    </Col>     
-                    <Col>                
-                        <Button variant="secondary" onClick={()=>{navigate("/")}}>나가기</Button>
-                    </Col>
-                    <Col sm={4}/>
-                </Row>
-            </Form>
+        <Container>
+            <Form noValidate onSubmit={handleSubmit}>
+                    <Row>
+                        <Col>
+                            <Form.Group className="mb-3" controlId="userid">
+                                <FloatingLabel controlId="floatingInputEnterID" label="Enter ID" className="mb-3 text-muted">  
+                                    <Form.Control isValid={touched.useraccount && !errors.useraccount} isInvalid={touched.useraccount && errors.useraccount} onChange={e => { handleChange(e); handleUserAccountChange(e) }} onBlur={handleBlur} type="id" placeholder="Enter ID" name="useraccount" value={values.useraccount}/>
+                                    <Form.Control.Feedback type="invalid">{errors.useraccount}</Form.Control.Feedback>
+                                </FloatingLabel>
+                                <Button size="sm" variant="primary" disabled={dupCheckDisabled} onClick={()=>{
+                                    setUniqueIdCheck(true)
+                                        let body={
+                                            useraccount : values.useraccount
+                                        }
+                                        axios.post('/duplicatedaccountCheck',body).then(async (v)=>{
+                                            console.log(v.data)
+                                            if(v.data<1)setUniqueId(true)
+                                            else setUniqueId(false)
+                                            setDupCheckDisabled(true);
+                                            await new Promise((r) => setTimeout(r, 1000));
+                                            setDupCheckDisabled(false);
+                                            validateField('useraccount')
+                                            console.log(uniqueId)
+                                        })
+                                    }}>중복확인</Button>
+                            </Form.Group>
         
+                            <Form.Group className="mb-3" controlId="userpw">
+                                <FloatingLabel controlId="floatingInputPassword" label="Password" className="mb-3 text-muted">
+                                    <Form.Control isValid={touched.pw && !errors.pw} isInvalid={touched.pw && errors.pw} onChange={handleChange} onBlur={handleBlur} type="password" placeholder="Password" name="pw" value={values.pw}/>
+                                    <Form.Control.Feedback type="invalid">{errors.pw}</Form.Control.Feedback>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="username">
+                                <FloatingLabel controlId="floatingUserName" label="User Name" className="mb-3 text-muted">
+                                <Form.Control isValid={touched.username && !errors.username} isInvalid={touched.username && errors.username} onChange={handleChange} onBlur={handleBlur} type="text"  placeholder="User Name" name="username" value={values.username}/>
+                                <Form.Control.Feedback type="invalid">{errors.username}</Form.Control.Feedback>
+                                </FloatingLabel>
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group className="mb-3" controlId="userposition">
+                                <FloatingLabel controlId="floatingInputPosition" label="User Position" className="mb-3 text-muted">
+                                    <Form.Control onChange={handleChange} type="text" placeholder="User Position" name="position" value={values.position}/>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="userteam">
+                                <FloatingLabel controlId="floatingInputTeam" label="User Team" className="mb-3 text-muted">
+                                    <Form.Control  isValid={touched.team && !errors.team} isInvalid={touched.team && errors.team} onChange={handleChange} onBlur={handleBlur} type="text" placeholder="User Team" name="team" value={values.team}/>
+                                    <Form.Control.Feedback type="invalid">{errors.team}</Form.Control.Feedback>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="usercompany">
+                                <FloatingLabel controlId="floatingCompany" label="User Company" className="mb-3 text-muted">
+                                    <Form.Control onChange={handleChange} type="text" placeholder="User Company" name="company" value={values.company}/>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="usermail">
+                                <FloatingLabel controlId="floatingEmail" label="User e-mail" className="mb-3 text-muted">
+                                    <Form.Control isValid={touched.email && !errors.email} isInvalid={touched.email && errors.email} onChange={handleChange} onBlur={handleBlur} type="email" placeholder="User e-mail" name="email" value={values.email}/>
+                                    <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="userphone">
+                                <FloatingLabel controlId="floatingPhone" label="User Phone Number" className="mb-3 text-muted">
+                                    <Form.Control isInvalid={touched.phone && errors.phone} onChange={handleChange} onBlur={handleBlur} type="tel" placeholder="User Phone Numver" name="phone" value={values.phone}/>
+                                    <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
+                                </FloatingLabel>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="userremark">
+                                <FloatingLabel controlId="floatingRemark" label="Remark" className="mb-3 text-muted">
+                                    <Form.Control onChange={handleChange} as="textarea" rows={3} placeholder="Remark" name="remark" value={values.remark}/>
+                                </FloatingLabel>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col/>    
+                        <Col>                
+                            <Button variant="primary" type="submit">계정생성</Button>
+                        </Col>
+                        <Col>                
+                            <Button variant="danger" type="reset" onClick={()=>{resetForm()}} >초기화</Button>
+                        </Col>     
+                        <Col>                
+                            <Button variant="secondary" onClick={()=>{navigate("/")}}>나가기</Button>
+                        </Col>
+                        <Col/>
+                    </Row>
+                </Form>
+            </Container>
         )}
         </Formik>
         </div>

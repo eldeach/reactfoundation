@@ -30,7 +30,7 @@ function MyCanvas({ name, ...props }) {
               localStorage.removeItem('persist:root')
               sessionStorage.removeItem('persist:root')
               axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
-              navigate("/")
+              navigate("/login")
               dispatch(setLoginStat(false))
               dispatch(setUserInfo({user_account : '', user_name : '로그인이 필요합니다.', user_auth : ["nothing"]}))
               handleClose()
