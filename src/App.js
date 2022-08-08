@@ -1,18 +1,41 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {  Routes, Route, useNavigate } from 'react-router-dom';
+import {  Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar, Container, NavDropdown, Nav, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from "react-redux"
+import { useEffect,useState} from 'react';
+import axios from 'axios';
 
 import LoginForm from './login/login';
 import MyCanvas from './login/myCanvas'
+import {setLoginStat, setUserInfo} from "./store.js"
 import CreateAccount from './login/createAccount';
+
 
 function App() {
   let rdx= useSelector((state)=>{return state});
 
-  let dispatch = useDispatch()
   let navigate = useNavigate()
+  // const location = useLocation();
+  // let [loginStat,setLoginStat] = useState(false);
+  // let dispatch = useDispatch()
+
+  // useEffect(() => {
+    // axios.get("/logincheck").then((res)=>{
+    //   console.log(res.data.loginStat)
+    //   res.data.loginStat  ? setLoginStat(true) : setLoginStat(false)
+    // }).catch((err)=>console.log(err))
+
+    // if(!loginStat){
+    //   localStorage.removeItem('persist:root')
+    //   sessionStorage.removeItem('persist:root')
+    //   axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
+    //   navigate("/login")
+    //   dispatch(setLoginStat(false))
+    //   dispatch(setUserInfo({user_account : '', user_name : '로그인이 필요합니다.', user_auth : ["nothing"]}))
+    // }
+
+// }, [location]);
 
   return (
     <div className="App">
