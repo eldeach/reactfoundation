@@ -7,6 +7,7 @@ import { useEffect,useState} from 'react';
 import axios from 'axios';
 
 import LoginForm from './login/login';
+import AccountView from './login/accountView';
 import MyCanvas from './login/myCanvas'
 import {setLoginStat, setUserInfo} from "./store.js"
 import CreateAccount from './login/createAccount';
@@ -101,7 +102,7 @@ function App() {
         <Route path='/' element={<div>home</div>}/>
         <Route path='/createaccount' element={<CreateAccount/>}/>
         <Route path='/authmng' element={<div>authmng</div>}/>
-        <Route path='/accountview' element={<div>accountview</div>}/>
+        <Route path='/accountview' element={<AccountView/>}/>
         <Route path='/authlist' element={<div>authlist</div>}/>
         <Route path='/item1-1' element={ <div>item1-1</div> }/>
         <Route path='/item2-1' element={ <div>item2-1</div> }/>

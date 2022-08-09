@@ -94,3 +94,19 @@ h1{
 {
   width:100vw;
 }
+
+/*======================= 테이블 페이지 =======================*/
+.tblheader{
+  overflow:scroll;
+  height: 80px;
+}
+
+.tblfooter{
+  overflow:scroll;
+  height: 80px;
+}
+
+.tbl{
+  overflow:scroll;
+  white-space:nowrap;
+}
