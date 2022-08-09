@@ -110,3 +110,20 @@ h1{
   overflow:scroll;
   white-space:nowrap;
 }
+
+tr {
+  width: 100%;
+  display: inline-table;
+  table-layout: fixed;
+  }
+  
+  table{
+   height:800px;             
+   display: block;
+  }
+  tbody{
+    overflow-y: scroll;      
+    height: 700px;            
+    width: 100%;
+    position: absolute;
+  }
