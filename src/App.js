@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import LoginForm from './login/login';
 import AccountView from './login/accountView';
+import DataTable from './login/dataTable';
 import MyCanvas from './login/myCanvas'
 import {setLoginStat, setUserInfo} from "./store.js"
 import CreateAccount from './login/createAccount';
@@ -105,7 +106,7 @@ function App() {
         <Route path='/accountview' element={<AccountView/>}/>
         <Route path='/authlist' element={<div>authlist</div>}/>
         <Route path='/item1-1' element={ <div>item1-1</div> }/>
-        <Route path='/item2-1' element={ <div>item2-1</div> }/>
+        <Route path='/item2-1' element={ <DataTable/> }/>
         <Route path='/login' element={<LoginForm/>}/>
       </Routes>
       
