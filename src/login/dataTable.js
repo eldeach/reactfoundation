@@ -39,15 +39,30 @@ export default function DataTable() {
     //   ];
 
     let columns = [
+      { field: 'id', headerName: 'ID', width: 70 },
+      { field: 'user_account', headerName: '계정', width: 70 },
+      { field: 'user_name', headerName: '사용자명', width: 70 },
+      { field: 'user_team', headerName: '부서', width: 70 },
+      { field: 'user_company', headerName: '회사', width: 70 },
+      { field: 'user_position', headerName: '직책', width: 70 },
+      { field: 'user_phone', headerName: '전화번호', width: 70 },
+      { field: 'user_email', headerName: '이메일', width: 70 },
+      { field: 'remark', headerName: '비고', width: 70 },
+      { field: 'insert_by', headerName: '입력계정', width: 70 },
+      { field: 'insert_datetime', headerName: '입력일시', width: 70 },
+      { field: 'update_by', headerName: '수정계정', width: 70 },
+      { field: 'update_datetime', headerName: '수정일시', width: 70 },
     ];
   
-  let rows = [
-
+  let rows2 = [
+    {user_account:"admin"}
   ];
+  let [cols,setCols] = useState([]);
+  let [rows,setRows] = useState([]);
   
     
     let [qryAccount,setQryAccount] = useState("");
-    let [listData,setListData] = useState([])
+
   useEffect(() => {
 
     let data = {
@@ -61,31 +76,35 @@ export default function DataTable() {
        headers:{
            'Content-Type':'application/json'
        }
-
    }).then((res)=>{
-       console.log(res);
-       setListData(res.data)
+      let tempCol=[]
+      let tempRow =[]
+      console.log(res.data)
 
        Object.keys(res.data[0]).map((columName,i)=>{
-        console.log({id:`${columName}`,headerName:`${columName}`,width:"30px"})
-        columns.push({id:`${columName}`,headerName:`${columName}`,width:"30px"})
+        tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*10)})
+       })
+       console.log(tempCol)
+       setCols(tempCol)
 
         res.data.map((oneRow,i)=>{
-            console.log(oneRow)
-            rows.push(oneRow)
-        }) 
-    })
-
+            let tempObjs = oneRow
+            tempObjs["id"]=(i+1)
+            tempRow.push(tempObjs)
+        })
+        setRows(tempRow) 
+    // })
+        
        
    })
   },[]);
 
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div className="MaterialTable" style={{ height: 400, width: '100%'}}>
       <DataGrid
         rows={rows}
-        columns={columns}
+        columns={cols}
         pageSize={5}
         rowsPerPageOptions={[5]}
         checkboxSelection
