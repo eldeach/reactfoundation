@@ -22,12 +22,27 @@ let loginUser = createSlice({
   }
 })
 
+let modalOpen = createSlice({
+  name : 'modalOpen',
+  initialState : false,
+  reducers : {
+      setModalOpen(state,newSet){
+        state = newSet.payload
+      }
+  }
+})
+
+
+
+
 export let {setLoginStat, setUserInfo, setLogOut} =  loginUser.actions
+export let {setModalOpen}= modalOpen.actions
 
 
 //=========================================================== // redux-persist setting
 const reducers = combineReducers({
-  loginUser : loginUser.reducer
+  loginUser : loginUser.reducer,
+  modalOpen : modalOpen.reducer,
 });
  
 const persistConfig = {

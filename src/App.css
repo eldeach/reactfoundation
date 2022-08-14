@@ -96,7 +96,7 @@ h1{
 }
 
 /*======================= 테이블 페이지 =======================*/
-.tblheader{
+/* .tblheader{
   overflow:scroll;
   height: 80px;
 }
@@ -109,11 +109,6 @@ h1{
 .tbl{
   overflow:scroll;
   white-space:nowrap;
-}
-
-.MaterialTable{
-  white-space: normal;
-  text-align: center;
 }
 
 tr {
@@ -131,4 +126,10 @@ tr {
     height: 700px;            
     width: 100%;
     position: absolute;
+  } */
+
+  .content-middle{
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
