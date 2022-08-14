@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import EditIcon from '@mui/icons-material/Edit';
-import FormControl from '@mui/material/FormControl';
+
 
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -122,17 +122,17 @@ export default function AccountMng() {
       <div style={{ height: 400, width: '100%' }}>
         <div style={{ display: 'flex', height: '100%' }}>
           <div style={{ flexGrow: 1 }}>
-            <DataGrid
-              rows={rows}
-              columns={cols}
-              pageSize={pageSize}
-              onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-              rowsPerPageOptions={[1, 10, 20]}
-              pagination
-              checkboxSelection
-              getRowHeight={() => rowHtAuto?'auto':''}
-              components={{ Toolbar: GridToolbar }} 
-            />
+              <DataGrid
+                rows={rows}
+                columns={cols}
+                pageSize={pageSize}
+                onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                rowsPerPageOptions={[1, 10, 20]}
+                pagination
+                checkboxSelection
+                getRowHeight={() => rowHtAuto?'auto':''}
+                components={{ Toolbar: GridToolbar }}
+              />
           </div>
         </div> 
       </div>       
@@ -145,7 +145,7 @@ async function InitialQry(para){
 
   let ajaxData = await axios({
     method:"get",
-    url:"/getaccountview",
+    url:"/getaccountmng",
     params:para,
     headers:{
         'Content-Type':'application/json'
@@ -155,13 +155,8 @@ async function InitialQry(para){
 
   let tempCol=[]
   let tempRow =[]
-  let colWidth=0;
 
   if (ajaxData.length>0){
-    Object.keys(ajaxData[0]).map((columName,i)=>{
-      colWidth += columName.length
-    })
-
     tempCol.push({
       field: 'action',
       headerName: 'Action',
