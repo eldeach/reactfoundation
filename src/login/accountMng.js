@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import {  useNavigate } from 'react-router-dom';
 
 import { DataGrid,GridToolbar  } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
@@ -14,8 +15,9 @@ import * as yup from 'yup';
 
 import axios from 'axios';
 
-
 export default function AccountMng() {
+  let navigate = useNavigate()
+
   //========================================================== Table Control Form 작동 Satae 정의 정의
   let [isSubmitting, setIsSubmitting] = useState(false); // Submit 중복 클릭 방지
   let [isResetting, setIsResetting] = useState(false); // Submit 중복 클릭 방지
@@ -38,7 +40,61 @@ export default function AccountMng() {
     // 초기 Table 조회
     setCols((await InitialQry({searchKeyWord : ""})).tempCol)
     setRows((await InitialQry({searchKeyWord : ""})).tempRow)
+
   },[]);
+
+
+
+  async function InitialQry(para){ 
+
+    let ajaxData = await axios({
+      method:"get",
+      url:"/getaccountmng",
+      params:para,
+      headers:{
+          'Content-Type':'application/json'
+      }})
+      .then((res)=>res.data)
+      .catch((err)=>alert(err))
+  
+    let tempCol=[]
+    let tempRow =[]
+  
+    if (ajaxData.length>0){
+      tempCol.push({
+        field: 'action',
+        headerName: 'Action',
+        sortable: false,
+        renderCell:(cellValues) => {
+          return (
+            <Button
+              variant="contained"
+              onClick={(event) => {
+                alert(cellValues.row.uuid_binary);
+                // window.location.replace('/createaccount')
+                navigate("/")
+              }}
+            >
+              <EditIcon fontSize="small"/>
+            </Button>
+          )}
+      })
+  
+      Object.keys(ajaxData[0]).map((columName,i)=>{
+        tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*13)})
+      })
+    
+      ajaxData.map((oneRow,i)=>{
+          let tempObjs = oneRow
+          tempObjs["id"]=(i+1)
+          tempRow.push(tempObjs)
+      })
+    }
+    
+    return ({tempCol:tempCol, tempRow:tempRow})
+  
+  }
+
 
 
   return (
@@ -141,50 +197,50 @@ export default function AccountMng() {
   );
 }
 
-async function InitialQry(para){ 
+// async function InitialQry(para){ 
 
-  let ajaxData = await axios({
-    method:"get",
-    url:"/getaccountmng",
-    params:para,
-    headers:{
-        'Content-Type':'application/json'
-    }})
-    .then((res)=>res.data)
-    .catch((err)=>alert(err))
+//   let ajaxData = await axios({
+//     method:"get",
+//     url:"/getaccountmng",
+//     params:para,
+//     headers:{
+//         'Content-Type':'application/json'
+//     }})
+//     .then((res)=>res.data)
+//     .catch((err)=>alert(err))
 
-  let tempCol=[]
-  let tempRow =[]
+//   let tempCol=[]
+//   let tempRow =[]
 
-  if (ajaxData.length>0){
-    tempCol.push({
-      field: 'action',
-      headerName: 'Action',
-      sortable: false,
-      renderCell:(cellValues) => {
-        return (
-          <Button
-            variant="contained"
-            onClick={(event) => {
-              alert(cellValues.row.uuid_binary);
-            }}
-          >
-            <EditIcon fontSize="small"/>
-          </Button>
-        )}
-    })
+//   if (ajaxData.length>0){
+//     tempCol.push({
+//       field: 'action',
+//       headerName: 'Action',
+//       sortable: false,
+//       renderCell:(cellValues) => {
+//         return (
+//           <Button
+//             variant="contained"
+//             onClick={(event) => {
+//               alert(cellValues.row.uuid_binary);
+//             }}
+//           >
+//             <EditIcon fontSize="small"/>
+//           </Button>
+//         )}
+//     })
 
-    Object.keys(ajaxData[0]).map((columName,i)=>{
-      tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*13)})
-    })
+//     Object.keys(ajaxData[0]).map((columName,i)=>{
+//       tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*13)})
+//     })
   
-    ajaxData.map((oneRow,i)=>{
-        let tempObjs = oneRow
-        tempObjs["id"]=(i+1)
-        tempRow.push(tempObjs)
-    })
-  }
+//     ajaxData.map((oneRow,i)=>{
+//         let tempObjs = oneRow
+//         tempObjs["id"]=(i+1)
+//         tempRow.push(tempObjs)
+//     })
+//   }
   
-  return ({tempCol:tempCol, tempRow:tempRow})
+//   return ({tempCol:tempCol, tempRow:tempRow})
 
-}
+// }
