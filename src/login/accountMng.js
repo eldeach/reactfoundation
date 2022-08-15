@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 
 import { Formik } from 'formik';
@@ -15,12 +16,15 @@ import * as yup from 'yup';
 
 import axios from 'axios';
 
-export default function AccountMng() {
+import cookies from 'react-cookies'
+
+function AccountMng() {
+  //========================================================== useNaviagte 선언
   let navigate = useNavigate()
 
   //========================================================== Table Control Form 작동 Satae 정의 정의
   let [isSubmitting, setIsSubmitting] = useState(false); // Submit 중복 클릭 방지
-  let [isResetting, setIsResetting] = useState(false); // Submit 중복 클릭 방지
+  let [isResetting, setIsResetting] = useState(false); // Reset 중복 클릭 방지
 
 
   // //========================================================== DataGrid Table 작동 state 정의
@@ -36,14 +40,24 @@ export default function AccountMng() {
   });
 
   //========================================================== useEffect 코드
-  useEffect(async () => {
-    // 초기 Table 조회
-    setCols((await InitialQry({searchKeyWord : ""})).tempCol)
-    setRows((await InitialQry({searchKeyWord : ""})).tempRow)
-
+  useEffect(() => {
+    // 이 페이지의 권한 유무 확인
+    authCheck()
+    //초기 Table 조회
+    InitializeTbl()
   },[]);
 
+  function authCheck(){
+    if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("ACCOUNTMNG",0)!=-1)){
+      alert("권한이 없습니다.")
+      navigate('/')
+    }
+  }
 
+  async function InitializeTbl (){
+    setCols((await InitialQry({searchKeyWord : ""})).tempCol)
+    setRows((await InitialQry({searchKeyWord : ""})).tempRow)
+  }
 
   async function InitialQry(para){ 
 
@@ -61,6 +75,11 @@ export default function AccountMng() {
     let tempRow =[]
   
     if (ajaxData.length>0){
+        
+      Object.keys(ajaxData[0]).map((columName,i)=>{
+        tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*13)})
+      })
+
       tempCol.push({
         field: 'action',
         headerName: 'Action',
@@ -71,17 +90,44 @@ export default function AccountMng() {
               variant="contained"
               onClick={(event) => {
                 alert(cellValues.row.uuid_binary);
-                // window.location.replace('/createaccount')
-                navigate("/")
+                navigate("/createaccount",  { state: { uuid_binary: cellValues.row.uuid_binary} })
               }}
             >
               <EditIcon fontSize="small"/>
             </Button>
           )}
       })
-  
-      Object.keys(ajaxData[0]).map((columName,i)=>{
-        tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*13)})
+
+      tempCol.push({
+        field: 'delete',
+        headerName: 'Delete',
+        sortable: false,
+        renderCell:(cellValues) => {
+          return (
+            <Button
+              variant="contained"
+              onClick={async (event) => {
+                let para = {
+                   uuid_binary: cellValues.row.uuid_binary 
+                }
+
+                let delResult =  await axios({
+                  method:"delete",
+                  url:"/deleteaccount",
+                  params:para,
+                  headers:{
+                      'Content-Type':'application/json'
+                  }})
+                  .then((res)=>res.data)
+                  .catch((err)=>alert(err))
+                alert(JSON.stringify(delResult));
+                setCols((await InitialQry({searchKeyWord : ""})).tempCol)
+                setRows((await InitialQry({searchKeyWord : ""})).tempRow)
+              }}
+            >
+              <DeleteForeverIcon fontSize="small"/>
+            </Button>
+          )}
       })
     
       ajaxData.map((oneRow,i)=>{
@@ -103,7 +149,7 @@ export default function AccountMng() {
       <div className="content-middle">
         <Formik
           validationSchema={schema}
-          onSubmit={async (values, {resetForm, isSubmitting})=>{
+          onSubmit={async (values, {resetForm})=>{
             let para = {
               searchKeyWord: values.searchKeyWord,
             }
@@ -165,7 +211,7 @@ export default function AccountMng() {
                     setRows((await InitialQry({searchKeyWord : ""})).tempRow)
                     setIsResetting(false)
                     }}>Reset</Button>
-                    <Button variant="outlined" type="reset" disabled={isResetting} onClick={async ()=>{
+                    <Button variant="outlined" disabled={isResetting} onClick={async ()=>{
                       if(rowHtAuto) setRowHtAuto(false)
                       else setRowHtAuto(true)
                     }}>{rowHtAuto?"Row Height : Current Auto":"Row Height : Current Fixed"}</Button>
@@ -197,50 +243,4 @@ export default function AccountMng() {
   );
 }
 
-// async function InitialQry(para){ 
-
-//   let ajaxData = await axios({
-//     method:"get",
-//     url:"/getaccountmng",
-//     params:para,
-//     headers:{
-//         'Content-Type':'application/json'
-//     }})
-//     .then((res)=>res.data)
-//     .catch((err)=>alert(err))
-
-//   let tempCol=[]
-//   let tempRow =[]
-
-//   if (ajaxData.length>0){
-//     tempCol.push({
-//       field: 'action',
-//       headerName: 'Action',
-//       sortable: false,
-//       renderCell:(cellValues) => {
-//         return (
-//           <Button
-//             variant="contained"
-//             onClick={(event) => {
-//               alert(cellValues.row.uuid_binary);
-//             }}
-//           >
-//             <EditIcon fontSize="small"/>
-//           </Button>
-//         )}
-//     })
-
-//     Object.keys(ajaxData[0]).map((columName,i)=>{
-//       tempCol.push({field:columName,headerName:`${columName}`,width:(columName.length*13)})
-//     })
-  
-//     ajaxData.map((oneRow,i)=>{
-//         let tempObjs = oneRow
-//         tempObjs["id"]=(i+1)
-//         tempRow.push(tempObjs)
-//     })
-//   }
-  
-//   return ({tempCol:tempCol, tempRow:tempRow})
-
-// }
+export default AccountMng

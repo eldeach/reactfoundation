@@ -1,12 +1,13 @@
 import { Form, FloatingLabel, Button,Col,Row,InputGroup, Container } from 'react-bootstrap';
 import axios from 'axios'
-import { useState } from 'react';
+import { useEffect,useState} from 'react';
 import {  Routes, Route, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux"
 import {setLoginStat, setUserInfo} from "./../store.js"
 import { Formik } from 'formik';
 import * as yup from 'yup';
-
+import { useLocation } from 'react-router-dom';
+import cookies from 'react-cookies'
 
 
 function CreateAccount(){
@@ -132,9 +133,29 @@ function CreateAccount(){
     //     console.log(values);
     //     console.log(actions)
     // }
+    const location = useLocation();
+
+    const aaa= (!location.state ? "N/A" : location.state.uuid_binary)
+
+
+    useEffect(() => {
+        authCheck()
+
+    }, []);
+
+    function authCheck(){
+        if(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("CREATEACCOUNT",0)!=-1){
+          
+        }
+        else{
+          alert("권한이 없습니다.")
+          navigate('/')
+        }
+        }
 
     return(
         <div className="createAccountPage">
+            <div>{aaa}</div>
         <Formik
         validationSchema={schema}
         onSubmit={(values, {resetForm})=>{

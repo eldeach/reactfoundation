@@ -6,6 +6,9 @@ import axios from 'axios';
 import {  Routes, Route, useNavigate } from 'react-router-dom';
 import {useDispatch, useSelector } from "react-redux"
 import {setLoginStat, setUserInfo, setLogOut} from './../store'
+import cookies from 'react-cookies'
+
+
 
 
 function MyCanvas({ name, ...props }) {
@@ -27,22 +30,20 @@ function MyCanvas({ name, ...props }) {
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>
             <Button variant="primary" size='sm' onClick={()=>{
-              localStorage.removeItem('persist:root')
-              sessionStorage.removeItem('persist:root')
+              cookies.remove('loginStat', {path :'/',})
+              cookies.remove('userInfo', {path :'/',})
               axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
               navigate("/login")
-              dispatch(setLoginStat(false))
-              dispatch(setUserInfo({user_account : '', user_name : '로그인이 필요합니다.', user_auth : ["nothing"]}))
               handleClose()
-              }}>{rdx.loginUser.loginStat ? rdx.loginUser.userInfo.user_name + "님 | 로그아웃" : "로그인 해주세요"}</Button>
+              }}>{cookies.load('loginStat') ? cookies.load('userInfo').user_name + "님 | 로그아웃" : "로그인 해주세요"}</Button>
             </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           <ListGroup>
             {
-              rdx.loginUser.userInfo.user_auth.map((oneAuth,i)=>{
+               cookies.load('userInfo')?cookies.load('userInfo').user_auth.map((oneAuth,i)=>{
                 return <ListGroup.Item size='sm'>권한 {i+1} : {oneAuth}</ListGroup.Item>
-              })
+              }):"N/A"
             }
           </ListGroup>
         </Offcanvas.Body>
