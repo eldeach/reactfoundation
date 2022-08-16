@@ -12,6 +12,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Paper from '@material-ui/core/Paper';
 import Slide from '@material-ui/core/Slide';
 import { makeStyles } from '@material-ui/core/styles' 
+import PanToolIcon from '@mui/icons-material/PanTool';
 
 
 import { Formik } from 'formik';
@@ -20,8 +21,9 @@ import * as yup from 'yup';
 import axios from 'axios';
 
 import cookies from 'react-cookies'
+import { EditRoadTwoTone } from '@mui/icons-material';
 
-
+//========================================================== Slide Popup config
 const useStyles = makeStyles((theme) => ({
   root: {
     height: 180,
@@ -47,33 +49,32 @@ const useStyles = makeStyles((theme) => ({
 
 
 function AccountMng() {
-  //========================================================== useNaviagte 선언
+  //========================================================== [변수, 객체 선언][useNaviagte]
   let navigate = useNavigate()
 
-  //========================================================== Table Control Form 작동 Satae 정의 정의
+  //========================================================== [변수, 객체 선언][테이블 조작 폼] 작동 Satae 정의
   let [isSubmitting, setIsSubmitting] = useState(false); // Submit 중복 클릭 방지
   let [isResetting, setIsResetting] = useState(false); // Reset 중복 클릭 방지
 
-
-  // //========================================================== DataGrid Table 작동 state 정의
-  let [pageSize, setPageSize] = useState(20);
-  let [rowHtAuto,setRowHtAuto] = useState(false);
-  let [cols,setCols] = useState([]); // Material UI Col 정의 State
-  let [rows,setRows] = useState([]); // Material UI Row 정의 State
-
-  //========================================================== Formik & yup Validation schema
+  //========================================================== [변수, 객체 선언][테이블 조작 폼] 유효성 검사 yup 스키마
   const schema = yup.object().shape({
     searchKeyWord: yup.string()
     .required('검색어를 입력해주세요.')
   });
 
-  //========================================================== Popup state 정의
+  //========================================================== [변수, 객체 선언][테이블] DataGrid Table 작동 state 정의
+  let [pageSize, setPageSize] = useState(20);
+  let [rowHtAuto,setRowHtAuto] = useState(false);
+  let [cols,setCols] = useState([]); // Material UI Col 정의 State
+  let [rows,setRows] = useState([]); // Material UI Row 정의 State
+
+  //========================================================== [변수, 객체 선언][슬라이드 팝업] 작동 state 정의
   let classes = useStyles();
   let [slidePopUp, setSlidePopUp] = useState(false);
   let [rowObj,setRowObj] = useState({});
   let [popUpConfirming,isPopUpConfirming]=useState(false);
 
-  //========================================================== useEffect 코드
+  //========================================================== [변수, 객체 선언][useEffect]
   useEffect(() => {
     // 이 페이지의 권한 유무 확인
     authCheck()
@@ -81,6 +82,7 @@ function AccountMng() {
     InitializeTbl()
   },[]);
 
+  //========================================================== [함수][권한] 권한 점검
   function authCheck(){
     if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("ACCOUNTMNG",0)!=-1)){
       alert("권한이 없습니다.")
@@ -88,11 +90,13 @@ function AccountMng() {
     }
   }
 
+  //========================================================== [함수][테이블] 전체 조회
   async function InitializeTbl (){
     setCols((await InitialQry({searchKeyWord : ""})).tempCol)
     setRows((await InitialQry({searchKeyWord : ""})).tempRow)
   }
 
+  //========================================================== [함수][테이블] 서버 데이터 조회 (검색기능)
   async function InitialQry(para){ 
 
     let ajaxData = await axios({
@@ -123,8 +127,12 @@ function AccountMng() {
             <Button
               variant="contained"
               onClick={(event) => {
-                alert(cellValues.row.uuid_binary);
-                navigate("/createaccount",  { state: { uuid_binary: cellValues.row.uuid_binary} })
+                if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("ADDACCOUNT",0)!=-1)){
+                  alert("권한이 없습니다.")
+                }
+                else{
+                  console.log(rowObj)
+                }
               }}
             >
               <EditIcon fontSize="small"/>
@@ -143,15 +151,11 @@ function AccountMng() {
               onClick={async (event) => {
                 if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("DELETEACCOUNT",0)!=-1)){
                   alert("권한이 없습니다.")
-                  navigate('/')
                 }
                 else{
                   setSlidePopUp(true);
                   setRowObj(cellValues.row)
-                  console.log(rowObj)
-                  //DelRow(cellValues.row.uuid_binary)
                 }
-                
               }}
             >
               <DeleteForeverIcon fontSize="small"/>
@@ -170,10 +174,12 @@ function AccountMng() {
   
   }
 
+  //========================================================== [페이지]
   return (
   <div>
     <Stack spacing={2}>
       <div className="content-middle">
+  {/* //====================================================== [테이블 조작 폼] */}
         <Formik
           validationSchema={schema}
           onSubmit={async (values, {resetForm})=>{
@@ -247,44 +253,39 @@ function AccountMng() {
             </Stack>
         )}
         </Formik>
+  {/* //====================================================== [삭제 팝업] */}
         <div className="slide-popup">
           <Slide direction="up" in={slidePopUp} mountOnEnter unmountOnExit>
-            <Paper style={{padding:'20px'}} elevation={4} className={classes.paper}>
-              <div>{rowObj.user_account}</div>
-              <div>{rowObj.user_name}</div>
-              <div>{rowObj.uuid_binary}</div>
-              <Button variant="contained" disabled={popUpConfirming} onClick={async ()=>{
-                isPopUpConfirming(true)
-                let para = {
-                  uuid_binary: rowObj.uuid_binary 
-                }
-                
-                let delResult =  await axios({
-                  method:"delete",
-                  url:"/deleteaccount",
-                  params:para,
-                  headers:{
-                    'Content-Type':'application/json'
-                  }})
-                  .then((res)=>res.data)
-                  .catch((err)=>alert(err))
-                alert(JSON.stringify(delResult));
-                setCols((await InitialQry({searchKeyWord : ""})).tempCol)
-                setRows((await InitialQry({searchKeyWord : ""})).tempRow)
-                setRowObj({})
-                isPopUpConfirming(false)
-                setSlidePopUp(false)
-              }}>Confirm</Button>
-              <Button variant="outlined" onClick={async ()=>{
-                setSlidePopUp(false)
-              }}>Cancel</Button>
-            </Paper>
+            <Stack spacing={2}>
+              <Paper style={{padding:'20px'}} elevation={4} className={classes.paper}>
+                <div style={{height:'700px'}}>
+                  <DeletePopup rowObj={rowObj}/>
+                </div>
+                  <div className="content-middle">
+                    <Stack spacing={2} direction="row">
+                      <Button variant="contained" disabled={popUpConfirming} onClick={async ()=>{
+                        isPopUpConfirming(true)
+                        DeleteRow(rowObj)
+                        setCols((await InitialQry({searchKeyWord : ""})).tempCol)
+                        setRows((await InitialQry({searchKeyWord : ""})).tempRow)
+                        setRowObj({})
+                        isPopUpConfirming(false)
+                        setSlidePopUp(false)
+                      }}>Confirm</Button>
+                    <Button variant="outlined" onClick={async ()=>{
+                      setSlidePopUp(false)
+                    }}>Cancel</Button>
+                  </Stack>
+                </div>
+              </Paper>
+            </Stack>
           </Slide>
         </div>
       </div>
+  {/* //====================================================== [테이블] */}
       <div style={{ height: 400, width: '100%' }}>
         <div style={{ display: 'flex', height: '100%' }}>
-          <div style={{ flexGrow: 1 }}>
+          <div className="content-middle" style={{ flexGrow: 1 }}>
               <DataGrid
                 rows={rows}
                 columns={cols}
@@ -305,3 +306,75 @@ function AccountMng() {
 }
 
 export default AccountMng
+
+function DeletePopup(props){
+  return(
+    <div style={{alignItems:"center"}}>
+      <div style={{color:"orange", fontSize: "100px"}}><PanToolIcon fontSize ="inherit"/></div>
+      <div style={{fontSize: "40px"}}>주의! 아래 정보가 삭제됩니다.</div>
+      <div style={{height:"24px"}}></div>
+      <div style={{width:"100%", height:"440px", justifyContent:"center", textAlign:"left",border:"1px solid", borderRadius:"5px 5px", padding:"10px", overflow:"scroll"}}>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>계정</div>
+            <div >{props.rowObj.user_account}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>사용자명</div>
+            <div >{props.rowObj.user_name}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>직책</div>
+            <div >{props.rowObj.user_position}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>팀</div>
+            <div >{props.rowObj.user_team}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>회사</div>
+            <div >{props.rowObj.user_company}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>E-Mail</div>
+            <div >{props.rowObj.user_email}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>전화</div>
+            <div >{props.rowObj.user_phone}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>비고</div>
+            <div >{props.rowObj.remark}</div>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <div className='delete-item'>UUID</div>
+            <div >{props.rowObj.uuid_binary}</div>
+          </Stack>
+        </Stack>
+      </div>
+    </div>
+
+  )
+}
+
+async function DeleteRow(rowObj){
+  let para = {
+    uuid_binary: rowObj.uuid_binary 
+  }
+  
+  let delResult =  await axios({
+    method:"delete",
+    url:"/deleteaccount",
+    params:para,
+    headers:{
+      'Content-Type':'application/json'
+    }})
+    .then((res)=>res.data)
+    .catch((err)=>alert(err))
+  alert(JSON.stringify(delResult));
+}
+
+async function EditRow(){
+  alert("수정완료")
+}

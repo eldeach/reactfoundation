@@ -61,7 +61,7 @@ function LoginForm(){
                 navigate("/login")
             }
         }
-      }).catch((err)=>console.log(err))
+      }).catch((err)=>alert(err))
 
    
       setDisabled(true);
