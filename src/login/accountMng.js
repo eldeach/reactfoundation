@@ -9,6 +9,9 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import Paper from '@material-ui/core/Paper';
+import Slide from '@material-ui/core/Slide';
+import { makeStyles } from '@material-ui/core/styles' 
 
 
 import { Formik } from 'formik';
@@ -17,6 +20,31 @@ import * as yup from 'yup';
 import axios from 'axios';
 
 import cookies from 'react-cookies'
+
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    height: 180,
+  },
+  wrapper: {
+    width: 100 + theme.spacing(2),
+  },
+  paper: {
+    zIndex: 1,
+    position: 'relative',
+    margin: theme.spacing(1),
+  },
+  svg: {
+    width: 100,
+    height: 100,
+  },
+  polygon: {
+    fill: theme.palette.common.white,
+    stroke: theme.palette.divider,
+    strokeWidth: 1,
+  },
+}));
+
 
 function AccountMng() {
   //========================================================== useNaviagte 선언
@@ -38,6 +66,12 @@ function AccountMng() {
     searchKeyWord: yup.string()
     .required('검색어를 입력해주세요.')
   });
+
+  //========================================================== Popup state 정의
+  let classes = useStyles();
+  let [slidePopUp, setSlidePopUp] = useState(false);
+  let [rowObj,setRowObj] = useState({});
+  let [popUpConfirming,isPopUpConfirming]=useState(false);
 
   //========================================================== useEffect 코드
   useEffect(() => {
@@ -107,22 +141,17 @@ function AccountMng() {
             <Button
               variant="contained"
               onClick={async (event) => {
-                let para = {
-                   uuid_binary: cellValues.row.uuid_binary 
+                if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("DELETEACCOUNT",0)!=-1)){
+                  alert("권한이 없습니다.")
+                  navigate('/')
                 }
-
-                let delResult =  await axios({
-                  method:"delete",
-                  url:"/deleteaccount",
-                  params:para,
-                  headers:{
-                      'Content-Type':'application/json'
-                  }})
-                  .then((res)=>res.data)
-                  .catch((err)=>alert(err))
-                alert(JSON.stringify(delResult));
-                setCols((await InitialQry({searchKeyWord : ""})).tempCol)
-                setRows((await InitialQry({searchKeyWord : ""})).tempRow)
+                else{
+                  setSlidePopUp(true);
+                  setRowObj(cellValues.row)
+                  console.log(rowObj)
+                  //DelRow(cellValues.row.uuid_binary)
+                }
+                
               }}
             >
               <DeleteForeverIcon fontSize="small"/>
@@ -140,8 +169,6 @@ function AccountMng() {
     return ({tempCol:tempCol, tempRow:tempRow})
   
   }
-
-
 
   return (
   <div>
@@ -220,6 +247,40 @@ function AccountMng() {
             </Stack>
         )}
         </Formik>
+        <div className="slide-popup">
+          <Slide direction="up" in={slidePopUp} mountOnEnter unmountOnExit>
+            <Paper style={{padding:'20px'}} elevation={4} className={classes.paper}>
+              <div>{rowObj.user_account}</div>
+              <div>{rowObj.user_name}</div>
+              <div>{rowObj.uuid_binary}</div>
+              <Button variant="contained" disabled={popUpConfirming} onClick={async ()=>{
+                isPopUpConfirming(true)
+                let para = {
+                  uuid_binary: rowObj.uuid_binary 
+                }
+                
+                let delResult =  await axios({
+                  method:"delete",
+                  url:"/deleteaccount",
+                  params:para,
+                  headers:{
+                    'Content-Type':'application/json'
+                  }})
+                  .then((res)=>res.data)
+                  .catch((err)=>alert(err))
+                alert(JSON.stringify(delResult));
+                setCols((await InitialQry({searchKeyWord : ""})).tempCol)
+                setRows((await InitialQry({searchKeyWord : ""})).tempRow)
+                setRowObj({})
+                isPopUpConfirming(false)
+                setSlidePopUp(false)
+              }}>Confirm</Button>
+              <Button variant="outlined" onClick={async ()=>{
+                setSlidePopUp(false)
+              }}>Cancel</Button>
+            </Paper>
+          </Slide>
+        </div>
       </div>
       <div style={{ height: 400, width: '100%' }}>
         <div style={{ display: 'flex', height: '100%' }}>
