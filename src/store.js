@@ -1,63 +1,71 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit' // redux 기본 라이브러리
 
-import storage from 'redux-persist/lib/storage'; // redux-persist 관련 라이브러리 (저장소 : 로컬 스토리지)
-import {combineReducers} from "redux"; // redux-persist 관련 라이브러리 (reducer 통합)
-import { persistReducer } from 'redux-persist' // redux-persist 관련 라이브러리
-import thunk from 'redux-thunk' // redux-persist 관련 라이브러리
 
-
-let loginUser = createSlice({
-  name : 'loginUser',
-  initialState : {loginStat : false, userInfo : {user_account : '', user_name : '로그인이 필요합니다.', user_auth : ["nothing"]}},
-  reducers : {
-      setLoginStat(state,newLoginStat){
-        state.loginStat = newLoginStat.payload
-      },
-      setUserInfo(state,newUserInfo){
-        state.userInfo = newUserInfo.payload
-      },
-      setLogOut(state){
-        state = {loginStat : false, userInfo : {user_account : '', user_name : '로그인이 필요합니다.', user_auth : ["nothing"]}}
-      }
+let slidePopup = createSlice({
+  name : 'slidePopup',
+  initialState:false,
+  reducers:{
+    setSlidePopup(state,newSet){
+      return state = newSet.payload
+    }
   }
 })
 
-let modalOpen = createSlice({
-  name : 'modalOpen',
-  initialState : false,
-  reducers : {
-      setModalOpen(state,newSet){
-        state = newSet.payload
-      }
+let sldiePopupFunc=createSlice({
+  name:'sldiePopupFunc',
+  initialState:"",
+  reducers:{
+    setSldiePopupFunc(state,newFunc){
+      return state = newFunc.payload
+    }
+  }
+})
+
+let SP_DeleteAccount_handle = createSlice({
+  name : 'SP_DeleteAccount_handle',
+  initialState : {},
+  reducers:{
+    setSP_DeleteAccount_handle(state,targetRow){
+      return state = targetRow.payload
+    }
+  }
+})
+
+let SP_SelectAccount_store_one =  createSlice({
+  name : 'SP_DeleteAccount_handle',
+  initialState : {},
+  reducers:{
+    setSP_SelectAccount_store_one(state,targetRow){
+      return state = targetRow.payload
+    }
+  }
+})
+
+let sel_tb_user = createSlice({
+  name : 'tb_user_sel',
+  initialState : {},
+  reducers:{
+    setSel_tb_user(state,targetRow){
+      return state = targetRow.payload
+    }
   }
 })
 
 
+export let {setSlidePopup} = slidePopup.actions
+export let {setSldiePopupFunc} = sldiePopupFunc.actions
+export let {setSP_DeleteAccount_handle} = SP_DeleteAccount_handle.actions
+export let {setSP_SelectAccount_store_one}=SP_SelectAccount_store_one.actions
+export let {setSel_tb_user}=sel_tb_user.actions
 
 
-export let {setLoginStat, setUserInfo, setLogOut} =  loginUser.actions
-export let {setModalOpen}= modalOpen.actions
 
-
-//=========================================================== // redux-persist setting
-const reducers = combineReducers({
-  loginUser : loginUser.reducer,
-  modalOpen : modalOpen.reducer,
-});
- 
-const persistConfig = {
-  key: 'root',
-  storage: storage,
-  whitelist: ["loginUser"]
-}
-
-const persistedReducer = persistReducer(persistConfig, reducers);
-
-//=========================================================== // export reducer
-const store = configureStore({
-  reducer: persistedReducer,
-  // devTools: process.env.NODE_ENV !== 'production',
-  middleware: [thunk]
-});
-
-export default store;
+export default configureStore({
+  reducer: {
+    slidePopup : slidePopup.reducer,
+    sldiePopupFunc : sldiePopupFunc.reducer,
+    SP_DeleteAccount_handle : SP_DeleteAccount_handle.reducer,
+    SP_SelectAccount_store_one:SP_SelectAccount_store_one.reducer,
+    sel_tb_user:sel_tb_user.reducer
+  }
+}) 

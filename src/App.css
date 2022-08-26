@@ -133,6 +133,16 @@ tr {
     align-items: center;
     justify-content: center;
   }
+  .content-left{
+    display: flex;
+    align-items: left;
+    justify-content: left;
+  }
+  .content-right{
+    display: flex;
+    align-items: right;
+    justify-content: right;
+  }
 
   .slide-popup{
     position : absolute; 
@@ -141,13 +151,23 @@ tr {
     margin-left : auto;
     margin-right : auto;
     top:100px;
-    width : 70vw;
+    width : 80vw;
   }
 
-  .delete-item{
-    border-radius: 5px;
-    background-color: darkgrey;
-    padding : 5px;
-    width: 200px;
-    color: white;
+  .info-item{
+    width: 100px;
+  }
+
+  .info-item-content{
+    overflow: scroll;
+    width: 300px;
+    max-height: 200px;
+    overflow-wrap: break-word;
+  }
+
+  .info-item-content-long{
+    overflow: scroll;
+    width: 500px;
+    max-height: 200px;
+    overflow-wrap: break-word;
   }
