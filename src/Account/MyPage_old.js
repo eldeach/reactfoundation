@@ -15,18 +15,27 @@ import * as yup from 'yup';
 import axios from 'axios';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
+import { propTypes } from 'react-bootstrap/esm/Image';
 
 
-function EditAccount() {
+function MyPage_old(props) {
   //========================================================== useNaviagte 선언
   let navigate = useNavigate()
 
   //========================================================== Form 작동 Satae 정의 정의
   let [isSubmitting, setIsSubmitting] = useState(false); // Submit 중복 클릭 방지
   let [isResetting, setIsResetting] = useState(false); // Reset 중복 클릭 방지
-  //let [isIdConfirming, setIsIdConfirming] = useState(false); // Id Confirm 중복 클릭 방지 disabled={true} //[ADD form에서 생략][PK관련] PK열은 수정지원 안 함
-  //let [uniqueIdCheck,setUniqueIdCheck] = useState(false); // user_account 유일성 점검을 한적이 있는지 체크 //[ADD form에서 생략][PK관련] PK열은 수정지원 안 함
-  //let [uniqueId,setUniqueId] = useState(false); // user_account 유일성이 확보되어 있는지 체크 //[ADD form에서 생략][PK관련] PK열은 수정지원 안 함
+  //========================================================== MyInfo 현재 값 저장
+  let [initMyInfo,setInitMyInfo]=useState({})
+  let [init_remark, set_remark]=useState("")
+  let [init_user_account, set_user_account]=useState("")
+  let [init_user_company, set_user_company]=useState("")
+  let [init_user_email, set_user_email]=useState("")
+  let [init_user_name, set_user_name]=useState("")
+  let [init_user_phone, set_user_phone]=useState("")
+  let [init_user_position, set_user_position]=useState("")
+  let [init_user_team, set_user_team]=useState("")
+  let [init_uuid_binary, set_uuid_binary]=useState("")
 
   //========================================================== Formik & yup Validation schema
   const schema = yup.object().shape({
@@ -39,31 +48,45 @@ function EditAccount() {
       )
   });
 
-  //========================================================== [ADD form에서 추가] 수정할 row Oject state 넘겨받기 위한 코드
-  const location = useLocation();
-  const targetRowObj= (!location.state ? "N/A" : location.state.rowObj)
+    //========================================================== [ADD form에서 추가] 수정할 row Oject state 넘겨받기 위한 코드
+    const location = useLocation();
+    const targetRowObj= (!location.state ? "N/A" : location.state.rowObj)
 
   //========================================================== useEffect 코드
   useEffect(() => {
-    // 이 페이지의 권한 유무 확인
-    authCheck()
+    // 내 정보 불러오기
+    myInfo()
   },[]);
 
-  function authCheck(){
-    if(cookies.load('loginStat')){
-      if(cookies.load('userInfo').user_auth.indexOf("EDIT_ACCOUNT",0)!=-1){
+  async function myInfo(){
+    let ajaxStat
+    let ajaxData = await axios({
+      method:"get",
+      url:"/getmypage",
+      params:{user_account:cookies.load("userInfo").user_account},
+      headers:{
+          'Content-Type':'application/json'
+      }})
+      .then((res)=>{
+        ajaxStat=res.data.success
 
-      }
-      else{
-          alert("EDIT_ACCOUNT 권한이 없습니다.")
-          navigate('/')
-      }
+        return res.data.result[0]
+      })
+      .catch((err)=>console.log(err))
+    // get URL 및 params 가변 코드 라인 끝
+    
+    if(!ajaxStat) alert("테이블 정보 조회를 실패했습니다.")
 
-    }
-    else{
-        alert("로그인 상태가 아닙니다.")
-        navigate('/')
-    }
+    set_remark(ajaxData.remark)
+    set_user_account(init_user_account=>ajaxData.user_account)
+    set_user_company(ajaxData.user_company)
+    set_user_email(ajaxData.user_email)
+    set_user_name(ajaxData.user_name)
+    set_user_phone(ajaxData.user_phone)
+    set_user_position(ajaxData.user_position)
+    set_user_team(ajaxData.user_team)
+    set_uuid_binary(ajaxData.uuid_binary)
+    setInitMyInfo(ajaxData)
   }
 
   async function formPut(qryBody){ //[ADD form에서 변경][AJAX 타입 변경] POST에서 PUT AJAX로 변경
@@ -89,7 +112,7 @@ function EditAccount() {
               user_email:values.user_email,
               user_phone:values.user_phone,
               remark: values.remark,
-              update_by:cookies.load('userInfo').user_account,
+              update_by:cookies.load('userInfo').uuid_binary,
               uuid_binary:values.uuid_binary
             }
             setIsSubmitting(true);
@@ -101,14 +124,15 @@ function EditAccount() {
           initialValues={{
             user_account: targetRowObj.user_account,
             user_pw:'',
+            user_pw_check:'',
             user_name:targetRowObj.user_name,
             user_position:targetRowObj.user_position,
             user_team:targetRowObj.user_team,
             user_company:targetRowObj.user_company,
             user_email:targetRowObj.user_email,
             user_phone:targetRowObj.user_phone,
-            remark: targetRowObj.remark,
-            uuid_binary:targetRowObj.uuid_binary
+            remark:targetRowObj.remark,
+            uuid_binary:targetRowObj.uuid_binary,
           }}
         >
         {({
@@ -125,7 +149,7 @@ function EditAccount() {
           <div style={{alignItems:"center", textAlign:"center"}}>
             <div style={{height: "20px"}}></div>
             <div style={{fontSize: "100px"}}><ManageAccountsIcon fontSize ="inherit" color="primary"/></div>
-            <div style={{fontSize: "40px"}}>Edit Account</div>
+            <div style={{fontSize: "40px"}}>{props.user_account}</div>
             <div style={{height: "20px"}}></div>
             <Stack spacing={2}>
               <Box
@@ -167,16 +191,36 @@ function EditAccount() {
                   fullWidth
                 />
 
+                <TextField
+                  required
+                  variant="standard"
+                  id="user_pw_check"
+                  name="user_pw_check"
+                  label="Password Check"
+                  value={values.user_pw}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  helperText={touched.user_pw_check ? errors.user_pw_check : ""}
+                  error={touched.user_pw_check && Boolean(errors.user_pw_check)}
+                  margin="dense"
+                  fullWidth
+                />
+
                 <Button variant="outlined" onClick={async ()=>{
                   if(!values.user_pw.includes(" ")&&!values.user_pw.length==0){
-                    let ajaxData = await axios.put("/resetaccountpw",{user_pw:values.user_pw,uuid_binary:values.uuid_binary,user_account:values.user_account, reset_by:cookies.load("userInfo").user_account})
-                    .then((res)=>{return res})
-                    .catch((err)=>err)
-                    if(ajaxData.data.success) alert("비밀번호가 변경되었습니다.")
-                    else {
-                      alert("비밀번호가 변경에 문제가 생겼습니다."+ ajaxData.data)
+                    if(values.user_pw==values.user_pw_check){
+                        let ajaxData = await axios.put("/resetaccountpw",{user_pw:values.user_pw,uuid_binary:values.uuid_binary,user_account:values.user_account, reset_by:cookies.load("userInfo").user_account})
+                        .then((res)=>{return res})
+                        .catch((err)=>err)
+                        if(ajaxData.data.success) alert("비밀번호가 변경되었습니다.")
+                        else {
+                            alert("비밀번호가 변경에 문제가 생겼습니다."+ ajaxData.data)
+                        }
+                        navigate('/mngaccount')
                     }
-                    navigate('/mngaccount')
+                    else{
+                        alert("재입력한 비밀번호가 일치하지 않습니다.")
+                    }
                   }
                   else{
                     alert("Password는 공백이 없어야 합니다.")
@@ -326,4 +370,4 @@ function EditAccount() {
   );
 }
 
-export default EditAccount
+export default MyPage_old

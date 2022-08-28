@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 //========================================================== Material UI 라이브러리 import
-import { DataGrid,GridToolbar  } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, GridExportCsvOptions, GridToolbarExport } from '@mui/x-data-grid';
 import {Box,TextField,Button,Paper, Modal, Divider} from '@mui/material/';
 //---------------------------------------------------------- Material Icons
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,7 +41,7 @@ function MngTable(props) {
     transform: 'translate(-50%, -50%)',
     width: '60vw',
     height:'600px',
-    overflow:'scroll',
+    overflow:'auto',
     padding:'20px'
   };
 
@@ -57,7 +57,6 @@ function MngTable(props) {
   let [isResetting, setIsResetting] = useState(false); // Reset 중복 클릭 방지
   let [delRowBt,setDelRowBt] = useState(false); // 행 삭제 버튼 클릭 여부 확인
   let [addRowBt,setAddRowBt] = useState(false); // 연관 테이블에 행 추가 버튼 클릭 여부 확인
-  let [selRowBt,setSelRowBt] = useState(false);
 
   //========================================================== [변수, 객체 선언][테이블 조작 폼] 유효성 검사 yup 스키마
   // 테이블 조작 폼 yup 스키마
@@ -124,6 +123,14 @@ function MngTable(props) {
         searchKeyWord : para.searchKeyWord,
       }
     }
+    else if(props.getUrlStr=="/getaudittrail")
+    {
+      allParams={
+        searchKeyWord : para.searchKeyWord,
+      }
+    }
+
+    let ajaxStat
     let ajaxData = await axios({
       method:"get",
       url:props.getUrlStr,
@@ -131,10 +138,15 @@ function MngTable(props) {
       headers:{
           'Content-Type':'application/json'
       }})
-      .then((res)=>res.data.result)
+      .then((res)=>{
+        ajaxStat=res.data.success
+        return res.data.result
+      })
       .catch((err)=>console.log(err))
     // get URL 및 params 가변 코드 라인 끝
     
+    if(!ajaxStat) alert("테이블 정보 조회를 실패했습니다.")
+
     let tempCol=[]
     let tempRow =[]
 
@@ -158,15 +170,9 @@ function MngTable(props) {
               <Button
                 variant="contained"
                 onClick={(event) => {
-                  if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("EDITACCOUNT",0)!=-1)){
-                    alert("권한이 없습니다.")
-                  }
-                  else{
-                    console.log(cellValues.row)
-                    navigate('/editaccount',{state: {
-                      rowObj: cellValues.row,
-                    },})
-                  }
+                  navigate('/editaccount',{state: {
+                    rowObj: cellValues.row,
+                  },})
                 }}
               >
                 <EditIcon fontSize="small"/>
@@ -178,6 +184,7 @@ function MngTable(props) {
       ajaxData.map((oneRow,i)=>{ //ajax 데이터 중 datetime 값을 한국시간으로 변경
           let tempObjs = oneRow
           tempObjs["id"]=(i+1)
+          tempObjs["action_datetime"] = moment(new Date(tempObjs["action_datetime"])).format('YYYY-MM-DD HH:mm:ss');
           tempObjs["insert_datetime"] = moment(new Date(tempObjs["insert_datetime"])).format('YYYY-MM-DD HH:mm:ss');
           tempObjs["update_datetime"] = moment(new Date(tempObjs["update_datetime"])).format('YYYY-MM-DD HH:mm:ss');
 
@@ -269,7 +276,7 @@ function MngTable(props) {
 
               {
                 props.addToListButton?
-                <Button style={{marginLeft:'5px'}} size="small" variant="outlined" onClick={async ()=>{
+                <Button style={{marginLeft:'5px'}} disabled={!props.tblCtrl} size="small" variant="outlined" onClick={async ()=>{
                   if(pickRows.length>0){
                     setAddRowBt(addRowBt=>true)
                     setModalTitle("사용자 인증")
@@ -283,7 +290,7 @@ function MngTable(props) {
 
               {
                 props.deleteButton?
-                <Button style={{marginLeft:'5px'}} size="small" variant="outlined" onClick={async ()=>{
+                <Button style={{marginLeft:'5px'}} disabled={!props.tblCtrl} size="small" variant="outlined" onClick={async ()=>{
                   if(pickRows.length>0){
                     if(props.getUrlStr=="/getmngaccount")
                     {
@@ -311,7 +318,7 @@ function MngTable(props) {
 
               {
                 props.selectButton?
-                <Button style={{marginLeft:'5px'}} size="small" variant="outlined" onClick={async ()=>{
+                <Button style={{marginLeft:'5px'}} disabled={!props.tblCtrl} size="small" variant="outlined" onClick={async ()=>{
                   if(props.getUrlStr=="/edituserauth_getuser"){
                     if(pickRows.length==1){
                       dispatch(setSel_tb_user(pickRows[0]))
@@ -331,7 +338,7 @@ function MngTable(props) {
       )}
       </Formik>
   {/* 테이블 폼 및 선택된 Row를 pickRows state에 저장할 수 있음 */}
-      <div style={{ height: 600, width: '100%' }}>
+      <div style={{ height: props.heightValue, width: '100%' }}>
         <div style={{ display: 'flex', height: '100%' }}>
           <div style={{ flexGrow: 1 }}>
               <DataGrid
@@ -343,7 +350,7 @@ function MngTable(props) {
                 pagination
                 checkboxSelection = {props.chkSel}
                 getRowHeight={() => rowHtAuto?'auto':''}
-                components={{ Toolbar: GridToolbar }}
+                components={{ Toolbar:CustomToolbar}}
                 onSelectionModelChange={(selectionModel,details)=>{
                   let tempPickRow=[]
                   selectionModel.map((oneRowId,i)=>{
@@ -378,22 +385,22 @@ function MngTable(props) {
                 alert(user_sign.msg)
                 if (props.getUrlStr=="/edituserauth_getuserauth"&&delRowBt)
                 {
-                  let reqResult = await DeleteUserAuth(pickRows)
-                  if(!reqResult.reqSat) alert(reqResult.result)
+                  let reqResult = await DeleteUserAuth(pickRows, props.targetPk.user_account)
+                  if(!reqResult.success) alert(reqResult.result)
                   InitializeTbl ()
                   setDelRowBt(delRowBt=>false)
                 }
                 else if (props.getUrlStr=="/edituserauth_getusernoauth"&&addRowBt)
                 {
                   let reqResult =  await AddUserAuth(pickRows, props.targetPk.user_account)
-                  if(!reqResult.reqSat) alert(reqResult.result)
+                  if(!reqResult.success) alert(reqResult.result)
                   InitializeTbl ()
                   setAddRowBt(addRowBt=>false)
                 }
                 else if (props.getUrlStr=="/getmngaccount"&&delRowBt)
                 {
                   let reqResult = await DeleteOneUser(pickRows[0])
-                  if(!reqResult.reqSat) alert(reqResult.result)
+                  if(!reqResult.success) alert(reqResult.result)
                   InitializeTbl ()
                   setDelRowBt(addRowBt=>false)
                 }
@@ -438,7 +445,7 @@ function MngTable(props) {
                 </div>
               </div>
               <Divider style={{marginTop:'5px',marginBottom:'20px'}}/>
-              <div style={{display:'block', height:'470px', overflow:"scroll"}}>
+              <div style={{display:'block', height:'470px', overflow:"auto"}}>
                 {
                   delRowBt?<div style={{fontSize:'20px'}}>{pickRows.length}개의 정보가 삭제됩니다.</div>:<div></div>
                 }
@@ -481,16 +488,18 @@ function MngTable(props) {
 
 export default MngTable
 
-async function DeleteUserAuth(pickRows){
+function CustomToolbar() {
+  return <GridToolbarExport csvOptions={{ utf8WithBom: true }} />;
+}
 
-  let uuid_binarys=[]
-
+async function DeleteUserAuth(pickRows, targetUser){
+  let targetRows=[]
   pickRows.map((oneRow,i)=>{
-    uuid_binarys.push(oneRow.uuid_binary)
+    targetRows.push({user_account:targetUser, user_auth:oneRow.user_auth, uuid_binary:oneRow.uuid_binary, delete_by:cookies.load('userInfo').user_account})
   })
 
-  let para = {
-    uuid_binary: uuid_binarys
+  let para={
+    targetRows:targetRows
   }
   
   let ajaxData =  await axios({
@@ -521,8 +530,10 @@ async function AddUserAuth(pickRows, targetUser){
 }
 
 async function DeleteOneUser(pickRows){
-  let para = {
-    uuid_binary: pickRows.uuid_binary 
+  let para={
+    user_account:pickRows.user_account,
+    uuid_binary: pickRows.uuid_binary ,
+    delete_by:cookies.load('userInfo').user_account
   }
   
   let ajaxData =  await axios({

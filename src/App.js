@@ -7,7 +7,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import {AppBar, Divider, Box, Toolbar, Typography, Button, IconButton, Drawer, ListItemButton, ListItemIcon, ListItemText, ListItem, List} from '@mui/material/';
 //----------------------------------------------------------- Material UI 라이브러리 (Icon) import
 import MenuIcon from '@mui/icons-material/Menu';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
@@ -22,10 +22,9 @@ import MngAccount from './Account/MngAccount';
 import AddAccount from './Account/AddAccount';
 import EditAccount from './Account/EditAccount';
 import EditUserAuth from './Auth/EditUserAuth';
-
-
-
-
+import AuditTrail from './AuditTrail/AuditTrail'
+import MyPage from './Account/MyPage';
+import MyPage_old from './Account/MyPage_old';
 
 
 function App() {
@@ -59,7 +58,7 @@ function App() {
     >
       <List>
         <ListItem disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={()=>{navigate("/mypage")}}>
             <ListItemIcon>
               <AccountCircleIcon /> 
             </ListItemIcon>
@@ -95,6 +94,16 @@ function App() {
         </ListItem>
       </List>
       <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={()=>{navigate("/audittrail")}}>
+            <ListItemIcon>
+              <ManageSearchIcon /> 
+            </ListItemIcon>
+            <ListItemText primary={"Audit Trail"} />
+          </ListItemButton>
+        </ListItem>
+      </List>
     </Box>
   );
 
@@ -125,9 +134,9 @@ function App() {
               React SPA Foundation
             </Typography>
             <Button color="inherit" onClick={()=>{
+              axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
               cookies.remove('loginStat', {path :'/',})
               cookies.remove('userInfo', {path :'/',})
-              axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
               navigate("/userlogin")}}>{cookies.load('loginStat') ? "LOGOUT" : "LOGIN"}</Button>
           </Toolbar>
         </AppBar>
@@ -140,9 +149,9 @@ function App() {
         <Route path='/mngaccount' element={<MngAccount/>}/>
         <Route path='/editaccount' element={<EditAccount/>}/>
         <Route path='/edituserauth' element={<EditUserAuth/>}/>
-        <Route path='/authlist' element={<div>authlist</div>}/>
-        <Route path='/item1-1' element={ <div>item1-1</div> }/>
-        <Route path='/item2-1' element={ <div>item2-1</div>}/>
+        <Route path='/testpage' element={<MyPage_old/>}/>
+        <Route path='/audittrail' element={ <AuditTrail/> }/>
+        <Route path='/mypage' element={ <MyPage />}/>
         <Route path='/userlogin' element={<UserLogin/>}/>
         <Route path='/login' element={<UserLogin/>}/>
       </Routes>

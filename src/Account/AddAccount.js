@@ -82,17 +82,30 @@ function AddAccount() {
   },[]);
 
   function authCheck(){
-    if(!(cookies.load('loginStat') && cookies.load('userInfo').user_auth.indexOf("ADDACCOUNT",0)!=-1)){
-      alert("권한이 없습니다.")
-      navigate('/')
+    if(cookies.load('loginStat')){
+      if(cookies.load('userInfo').user_auth.indexOf("ADD_ACCOUNT",0)!=-1){
+
+      }
+      else{
+          alert("ADD_ACCOUNT 권한이 없습니다.")
+          navigate('/')
+      }
+
+    }
+    else{
+        alert("로그인 상태가 아닙니다.")
+        navigate('/')
     }
   }
 
   async function formPost(qryBody){
     let ajaxData = await axios.post("/postaddaccount",qryBody)
     .then((res)=>res.data)
-    .catch((err)=>console.log(err))
-    return ajaxData 
+    .catch((err)=>err)
+
+    if(ajaxData.success) return ajaxData.result
+    else alert(ajaxData)
+    
   }
 
   return (
@@ -150,9 +163,6 @@ function AddAccount() {
               <Box
               id="postform"
               component="form"
-              // sx={{
-              //   '& .MuiTextField-root': { m: 1, width: '25ch' },
-              // }}
               sx={{ width: 500, display: 'flex', flexWrap: 'wrap' }}
               noValidate
               onSubmit={handleSubmit}
@@ -175,17 +185,21 @@ function AddAccount() {
 
                 <Button variant="outlined" disabled={isIdConfirming} onClick={async ()=>{
                   setUniqueIdCheck(true)
+                  setIsIdConfirming(uniqueId=>true)
+
                   let body={
                     user_account : values.user_account
                   }
-                  axios.post('/duplicatedaccountCheck',body).then(async (v)=>{
-                    setIsIdConfirming(true)
-                    if(v.data<1)setUniqueId(true)
-                    else setUniqueId(false)
-                    await new Promise((r) => setTimeout(r, 1000));
-                    validateField('user_account')
-                    setIsIdConfirming(false)
-                  })
+
+                  let ajaxData=await axios.post('/duplicatedaccountCheck',body)
+                  .then((res)=>res.data)
+                  .catch((err)=>err)
+
+                  if(ajaxData.result.length<1) setUniqueId(uniqueId=>true)
+                  else setUniqueId(uniqueId=>false)
+                  await new Promise((r) => setTimeout(r, 1000));
+                  validateField('user_account')
+                  setIsIdConfirming(uniqueId=>false)
                 }}>Confirm</Button>
 
                 <TextField

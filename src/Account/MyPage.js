@@ -11,7 +11,8 @@ import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import cookies from 'react-cookies'
 //========================================================== Slide Popup 컴포넌트 & Redux import
 import { useDispatch, useSelector } from "react-redux"
-import { setSel_tb_user } from "./../store.js"
+//========================================================== axios 라이브러리 import
+import axios from 'axios';
 //========================================================== MngTable 컴포넌트 import
 import MngTable from './../MngTable/MngTable'
 
@@ -42,25 +43,42 @@ function EditUserAuth() {
   let rdx = useSelector((state) => { return state } )
   let dispatch = useDispatch();
 
+  //========================================================== [MyInfo] 현재값 조회 state 및 함수 선언
+  let [initMyInfo,setInitMyInfo]=useState({})
+  async function myInfo(){
+    if(cookies.load('loginStat')){
+    let ajaxStat
+    let ajaxData = await axios({
+      method:"get",
+      url:"/getmypage",
+      params:{user_account:cookies.load("userInfo").user_account},
+      headers:{
+          'Content-Type':'application/json'
+      }})
+      .then((res)=>{
+        ajaxStat=res.data.success
+        setInitMyInfo(res.data.result[0])
+        return res.data.result[0]
+      })
+      .catch((err)=>console.log(err))
+    // get URL 및 params 가변 코드 라인 끝
+    
+    if(!ajaxStat) alert("테이블 정보 조회를 실패했습니다.")
+    }
+  }
+
+
   //========================================================== [변수, 객체 선언][useEffect]
   useEffect(() => {
     // 이 페이지의 권한 유무 확인
     authCheck()
-
-    //유저 선택 redux 초기화
-    dispatch(setSel_tb_user({}))
+    // 내 정보 현재값 조회
+    myInfo()
   },[]);
 
   //========================================================== [함수][권한] 권한 점검
   function authCheck(){
     if(cookies.load('loginStat')){
-      if(cookies.load('userInfo').user_auth.indexOf("EDIT_USER_AUTH",0)!=-1){
-
-      }
-      else{
-          alert("EDIT_USER_AUTH 권한이 없습니다.")
-          navigate('/')
-      }
 
     }
     else{
@@ -69,6 +87,7 @@ function EditUserAuth() {
     }
   }
 
+
   return (
       <Stack style={{padding:'10px'}} direction='row' spacing={2}>
         <Paper style={{width:'25%', height:'650px',  padding:'20px', marginLeft:'10px',marginRight:'10px'}} elevation={3}>
@@ -76,79 +95,43 @@ function EditUserAuth() {
             <div style={{display:'flex', alignContent:'center'}}>
               <AccountCircleIcon style={{fontSize: "58px",width:"12%"}} fontSize ="inherit" color="primary"/>
               <div style={{display:'block',  width:"70%"}}>
-                <div style={{fontSize:'30px'}}>{rdx.sel_tb_user.user_name}</div>
-                <div style={{fontSize:'15px'}}>{rdx.sel_tb_user.user_account}</div>
-              </div>
-              <div style={{display: "flex", justifyContent: "flex-end", width:"18%"}}>
-                <Button size="small" variant="contained" onClick={()=>{
-                  setModalTitle("계정 선택")
-                  handleModalOpen()
-                  setRefresh(false)
-                  }}>선택</Button>
+                <div style={{fontSize:'30px'}}>{initMyInfo.user_name}</div>
+                <div style={{fontSize:'15px'}}>{initMyInfo.user_account}</div>
               </div>
             </div>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="직책" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.user_position}</div>
+              <div className='info-item-content'>{initMyInfo.user_position}</div>
             </Stack>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="팀" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.user_team}</div>
+              <div className='info-item-content'>{initMyInfo.user_team}</div>
             </Stack>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="회사" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.user_company}</div>
+              <div className='info-item-content'>{initMyInfo.user_company}</div>
             </Stack>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="E-Mail" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.user_email}</div>
+              <div className='info-item-content'>{initMyInfo.user_email}</div>
             </Stack>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="전화" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.user_phone}</div>
+              <div className='info-item-content'>{initMyInfo.user_phone}</div>
             </Stack>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="Remark" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.remark}</div>
+              <div className='info-item-content'>{initMyInfo.remark}</div>
             </Stack>
             <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
               <Chip className="info-item" label="UUID" color="primary" variant="outlined" />
-              <div className='info-item-content'>{rdx.sel_tb_user.uuid_binary}</div>
+              <div className='info-item-content'>{initMyInfo.uuid_binary}</div>
             </Stack>
-            <Button size="small" variant="contained" onClick={async ()=>{
-              setRefresh(true)
-              }}>Confirm</Button>
           </Stack>
         </Paper>
         <Paper style={{width:'75%', padding:'20px', marginLeft:'10px',marginRight:'10px'}} elevation={3}>
-          <Stack spacing={2}>
-            {
-              refresh?<MngTable getUrlStr={'/edituserauth_getusernoauth'} targetPk={{user_account:rdx.sel_tb_user.user_account}} heightValue={600} tblCtrl={true} chkSel={true} deleteButton={false} addToListButton={true} editable={false} selectButton={false}/>:<div></div>
-            }
-            {
-              refresh?<MngTable getUrlStr={'/edituserauth_getuserauth'} targetPk={{user_account:rdx.sel_tb_user.user_account}} heightValue={600} tblCtrl={true} chkSel={true} deleteButton={true} addToListButton={false} editable={false} selectButton={false}/>:<div></div>
-            }
-          </Stack>
+              <div>aa</div>
         </Paper>
-          <Modal open={openModal} onClose={handleModalClose}>
-            <Paper style={modalStyle} elevation={5}>
-              <div style={{width: '100%', display: 'block'}}>
-                <div style={{width:'100%',display:'flex'}}>
-                  <div style={{width:'50%',display:'flex', alignItems:'center', justifyContent:'flex-start'}}>
-                    <PrivacyTipIcon color="primary"/>
-                    <div>{modalTitle}</div>
-                  </div>
-                  <div style={{width:'50%',display:'flex', alignItems:'center', justifyContent:'flex-end'}}>
-                    <Button size="small" variant="outlined" onClick={()=>{handleModalClose()}}>Close</Button>
-                  </div>
-                </div>
-                <Divider style={{marginTop:'5px',marginBottom:'10px'}}/>
-                <div style={{display:'block', height:'550px', overflow:"auto"}}>
-                  <MngTable getUrlStr={'/edituserauth_getuser'} targetPk={{}} heightValue={480} tblCtrl={true} chkSel={false} deleteButton={false} addToListButton={false} editable={false} selectButton={true}/>
-                </div>
-              </div>
-            </Paper>
-          </Modal>
       </Stack>
   );
 }
