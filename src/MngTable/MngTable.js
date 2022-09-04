@@ -24,15 +24,21 @@ import cookies from 'react-cookies'
 //========================================================== Moment 라이브러리 import
 import moment from 'moment';
 import 'moment/locale/ko';	//대한민국
-//========================================================== Slide Popup 컴포넌트 & Redux import
+//========================================================== Redux import
 import { useDispatch, useSelector } from "react-redux"
-import { setSel_tb_user } from "./../store.js"
+import { setSel_tb_user, setLoginExpireTime} from "./../store.js"
+//========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
+import LoginSessionCheck from './../Account/LoginSessionCheck.js';
 
 function MngTable(props) {
   //========================================================== [Modal] 모달 열기/닫기 및 스타일 정의
   let [openModal, setOpenModal] = useState(false);
-  let handleModalOpen = () => setOpenModal(true);
-  let handleModalClose = () => setOpenModal(false);
+  let handleModalOpen = () => {
+    setOpenModal(true);
+  }
+  let handleModalClose = () => {
+    setOpenModal(false);
+  }
   let [modalTitle,setModalTitle] = useState(false);
   const modalStyle = {
     position: 'absolute',
@@ -77,6 +83,17 @@ function MngTable(props) {
     //초기 Table 조회
     InitializeTbl()
   },[]);
+
+  async function LoginCheck(){
+    let checkResult = await LoginSessionCheck("check",{})
+    if(checkResult.expireTime==0){
+      dispatch(setLoginExpireTime(0))
+      navigate('/login')
+    }
+    else{
+      dispatch(setLoginExpireTime(checkResult.expireTime))
+    }
+  }
 
   //========================================================== [변수, 객체 선언][테이블] DataGrid Table 작동 state 정의
   let [pageSize, setPageSize] = useState(20);
@@ -144,57 +161,62 @@ function MngTable(props) {
       })
       .catch((err)=>console.log(err))
     // get URL 및 params 가변 코드 라인 끝
-    
-    if(!ajaxStat) alert("테이블 정보 조회를 실패했습니다.")
 
     let tempCol=[]
     let tempRow =[]
+    
+    if(!ajaxStat){console.log("테이블 정보 조회를 실패했습니다.")
 
-    // 컬럼 및 행 데이터 분류 시작
-    if (ajaxData.length>0) // (조회된 데이터가 있는 경우에만 작동)
-    {    
-      Object.keys(ajaxData[0]).map((columName,i)=>{
-        let tempMinWidth = columName.length*14
-        if(columName=="remark") tempMinWidth= 200
-        if(columName=="uuid_binary") tempMinWidth= 200
-        tempCol.push({field:columName,headerName:`${columName}`,minWidth:(tempMinWidth), flex:1})
-      })
+    }
+    else{
+      // 컬럼 및 행 데이터 분류 시작
+      if (ajaxData.length>0) // (조회된 데이터가 있는 경우에만 작동)
+      {    
+        Object.keys(ajaxData[0]).map((columName,i)=>{
+          let tempMinWidth = columName.length*14
+          if(columName=="remark") tempMinWidth= 200
+          if(columName=="uuid_binary") tempMinWidth= 200
+          tempCol.push({field:columName,headerName:`${columName}`,minWidth:(tempMinWidth), flex:1})
+        })
 
-      if (props.editable){
-        tempCol.push({
-          field: 'action',
-          headerName: 'Action',
-          sortable: false,
-          renderCell:(cellValues) => {
-            return (
-              <Button
-                variant="contained"
-                onClick={(event) => {
-                  navigate('/editaccount',{state: {
-                    rowObj: cellValues.row,
-                  },})
-                }}
-              >
-                <EditIcon fontSize="small"/>
-              </Button>
-            )}
+        if (props.editable){
+          tempCol.push({
+            field: 'action',
+            headerName: 'Action',
+            sortable: false,
+            renderCell:(cellValues) => {
+              return (
+                <Button
+                  variant="contained"
+                  onClick={(event) => {
+                    navigate('/editaccount',{state: {
+                      rowObj: cellValues.row,
+                    },})
+                  }}
+                >
+                  <EditIcon fontSize="small"/>
+                </Button>
+              )}
+          })
+        }
+
+        ajaxData.map((oneRow,i)=>{ //ajax 데이터 중 datetime 값을 한국시간으로 변경
+            let tempObjs = oneRow
+            tempObjs["id"]=(i+1)
+            tempObjs["action_datetime"] = moment(new Date(tempObjs["action_datetime"])).format('YYYY-MM-DD HH:mm:ss');
+            tempObjs["insert_datetime"] = moment(new Date(tempObjs["insert_datetime"])).format('YYYY-MM-DD HH:mm:ss');
+            tempObjs["update_datetime"] = moment(new Date(tempObjs["update_datetime"])).format('YYYY-MM-DD HH:mm:ss');
+
+            if (tempObjs["insert_datetime"]=="1970-01-01 09:00:00") tempObjs["insert_datetime"]=""
+            if (tempObjs["update_datetime"]=="1970-01-01 09:00:00") tempObjs["update_datetime"]=""
+
+            tempRow.push(tempObjs)
         })
       }
-
-      ajaxData.map((oneRow,i)=>{ //ajax 데이터 중 datetime 값을 한국시간으로 변경
-          let tempObjs = oneRow
-          tempObjs["id"]=(i+1)
-          tempObjs["action_datetime"] = moment(new Date(tempObjs["action_datetime"])).format('YYYY-MM-DD HH:mm:ss');
-          tempObjs["insert_datetime"] = moment(new Date(tempObjs["insert_datetime"])).format('YYYY-MM-DD HH:mm:ss');
-          tempObjs["update_datetime"] = moment(new Date(tempObjs["update_datetime"])).format('YYYY-MM-DD HH:mm:ss');
-
-          if (tempObjs["insert_datetime"]=="1970-01-01 09:00:00") tempObjs["insert_datetime"]=""
-          if (tempObjs["update_datetime"]=="1970-01-01 09:00:00") tempObjs["update_datetime"]=""
-
-          tempRow.push(tempObjs)
-      })
+      // 컬럼 및 행 데이터 분류 종료
     }
-    // 컬럼 및 행 데이터 분류 종료
+
+
 
     // 컬럼 및 행 데이터 분류 결과 object 형식으로 return
     return ({tempCol:tempCol, tempRow:tempRow})
@@ -219,6 +241,7 @@ function MngTable(props) {
           setRows(tempData.tempRow)
           resetForm()
           setIsSubmitting(false);
+          // LoginCheck()
         }}
         initialValues={{
           searchKeyWord: ''
@@ -268,10 +291,12 @@ function MngTable(props) {
                 resetForm()
                 InitializeTbl ()
                 setIsResetting(false)
+                LoginCheck()
                 }}><RefreshIcon/></Button>
               <Button style={{marginLeft:'5px'}} size="small" variant="outlined" onClick={async ()=>{
                 if(rowHtAuto) setRowHtAuto(false)
                 else setRowHtAuto(true)
+                LoginCheck()
               }}><LineWeightIcon/></Button>
 
               {
@@ -330,7 +355,6 @@ function MngTable(props) {
                   }
                   else{
                   }
-
                 }}><CheckIcon/></Button>:<div></div>
               }
             </div>
@@ -410,7 +434,7 @@ function MngTable(props) {
               else{
                 alert(user_sign.msg)
               }
-
+              LoginCheck()
           }}
           initialValues={{
             sign_user_pw: ''
@@ -441,7 +465,10 @@ function MngTable(props) {
                   <div>{modalTitle}</div>
                 </div>
                 <div style={{width:'50%',display:'flex', alignItems:'center', justifyContent:'flex-end'}}>
-                  <Button size="small" variant="outlined" onClick={()=>{handleModalClose()}}>Close</Button>
+                  <Button size="small" variant="outlined" onClick={()=>{
+                    handleModalClose()
+                    LoginCheck()
+                    }}>Close</Button>
                 </div>
               </div>
               <Divider style={{marginTop:'5px',marginBottom:'20px'}}/>

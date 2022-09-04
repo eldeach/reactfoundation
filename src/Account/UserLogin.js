@@ -15,9 +15,20 @@ import * as yup from 'yup';
 import axios from 'axios';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
+//========================================================== Slide Popup 컴포넌트 & Redux import
+import { useDispatch, useSelector } from "react-redux"
+import { setLoginExpireTime } from "./../store.js"
+//========================================================== Moment 라이브러리 import
+import moment from 'moment';
+import 'moment/locale/ko';	//대한민국
+//========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
+import LoginSessionCheck from './LoginSessionCheck.js';
 
 
 function UserLogin() {
+  //========================================================== [변수, 객체 선언] 선택된 정보 redux 저장용
+  let rdx = useSelector((state) => { return state } )
+  let dispatch = useDispatch();
   //========================================================== useNaviagte 선언
   let navigate = useNavigate()
 
@@ -40,37 +51,32 @@ function UserLogin() {
 
   },[]);
 
-  async function formPost(qryBody){ 
-      axios.post("/login",qryBody).then(function(res){
-        if (res.data.loginStat){
-            const expires = new Date()
-            expires.setMinutes(expires.getMinutes() + 1)
-            cookies.save('loginStat',res.data.loginStat,{path :'/',
-            //expires:expires,          // 유효 시간
-            //secure: true,   // 웹 브라우저와 웹 서버가 https로 통신하는 경우에만 쿠키 저장
-            //httpOnly: true  // document.cookie라는 자바스크립트 코드로 쿠키에 비정상적으로 접속하는 것을 막는 옵션
-            })
-            cookies.save('userInfo',res.data.userInfo,{path :'/',
-                //expires:expires,          // 유효 시간
-                //secure: true,   // 웹 브라우저와 웹 서버가 https로 통신하는 경우에만 쿠키 저장
-                //httpOnly: true  // document.cookie라는 자바스크립트 코드로 쿠키에 비정상적으로 접속하는 것을 막는 옵션
-            })
-            navigate("/")
-        }
-        else {
-            if(res.data.flashMsg=="wrong PW"){
-                alert("비밀번호가 틀렸습니다.")
-                navigate("/login")
-            }
-            else if(res.data.flashMsg=="no user_account"){
-                alert("존재하지 않는 계정입니다.")
-                navigate("/login")
-            }else if(res.data.flashMsg=="no auth"){
-                alert("이 계정은 권한이 없습니다.")
-                navigate("/login")
-            }
-        }
-      }).catch((err)=>alert(err))
+  async function LoginCheck(qryBody){
+    let checkResult = await LoginSessionCheck("init",qryBody)
+    if(checkResult.expireTime==0){
+      if(checkResult.flashMsg=="wrong PW"){
+        dispatch(setLoginExpireTime(0))
+        alert("비밀번호가 틀렸습니다.")
+        navigate("/login")
+      }
+      else if(checkResult.flashMsg=="no user_account")
+      {
+        dispatch(setLoginExpireTime(0))
+        alert("존재하지 않는 계정입니다.")
+        navigate("/login")
+      }
+      else if(checkResult.flashMsg=="no auth")
+      {
+        dispatch(setLoginExpireTime(0))
+        alert("이 계정은 권한이 없습니다.")
+        navigate("/login")
+      }
+      navigate('/login')
+    }
+    else{
+      dispatch(setLoginExpireTime(checkResult.expireTime))
+      navigate("/")
+    }
   }
 
   return (
@@ -83,7 +89,7 @@ function UserLogin() {
               pw:values.user_pw
             }
             setIsSubmitting(true);
-            await formPost(qryBody)
+            await LoginCheck(qryBody)
             resetForm()
             setIsSubmitting(false);
           }}

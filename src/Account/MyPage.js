@@ -4,19 +4,92 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import {  useNavigate } from 'react-router-dom';
 //========================================================== Material UI 라이브러리 import
-import {Chip, Button, Stack, Paper,Divider,Modal, Checkbox, ListItemIcon, ListItemText, ListItem, CardHeader, Card, List, Grid} from '@mui/material/';
+import {PropTypes, Tabs, Tab, Typography, Box, Chip, Button, Stack, Paper,Divider, TextField, Modal, Checkbox, ListItemIcon, ListItemText, ListItem, CardHeader, Card, List, Grid} from '@mui/material/';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
+import LockResetIcon from '@mui/icons-material/LockReset';
+//========================================================== Formik & Yup 라이브러리 import
+import { Formik } from 'formik';
+import * as yup from 'yup';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
 //========================================================== Slide Popup 컴포넌트 & Redux import
 import { useDispatch, useSelector } from "react-redux"
+import { setLoginExpireTime } from "./../store.js"
 //========================================================== axios 라이브러리 import
 import axios from 'axios';
 //========================================================== MngTable 컴포넌트 import
 import MngTable from './../MngTable/MngTable'
+//========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
+import LoginSessionCheck from './LoginSessionCheck.js';
 
-function EditUserAuth() {
+function MyPage() {
+    //========================================================== Form 작동 Satae 정의 정의
+    let [isSubmitting, setIsSubmitting] = useState(false); // Submit 중복 클릭 방지
+    let [isResetting, setIsResetting] = useState(false); // Reset 중복 클릭 방지
+
+  //========================================================== Formik & yup Validation schema
+  const changePwSchema = yup.object().shape({
+    before_user_pw: yup.string()
+    .required('현재 비밀번호를 입력해주세요.'),
+    after_user_pw: yup.string()
+    .required('변결할 비밀번호를 입력해주세요.')
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+      "패스워드는 최소 한개의 대문자, 소문자, 숫자 및 특수문자가 포함되어야 하며 8자리 이상이어야 합니다."
+    )
+    .test(
+        'useraccount_blank_check',
+        "공백은 없어야 합니다.",
+        function(value){
+            if(typeof(value)=="string"){
+                return !value.includes(" ")
+            }
+        }
+    ),
+    after_user_pw_check: yup.string()
+    .required('변경할 비밀번호를 재입력해주세요.')
+    .oneOf([yup.ref('after_user_pw'), null], '재입력한 비밀번호는 일치해야합니다.')
+  });
+  //========================================================== [Tab] Tab 관련 함수 및 state 정의
+  function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <Box sx={{ p: 1 }}>
+            <Typography>{children}</Typography>
+          </Box>
+        )}
+      </div>
+    );
+  }
+
+  TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+  };
+
+  function a11yProps(index) {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`,
+    };
+  }
+
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   //========================================================== [Modal] 모달 열기/닫기 및 스타일 정의
   let [openModal, setOpenModal] = useState(false);
   let handleModalOpen = () => setOpenModal(true);
@@ -32,9 +105,6 @@ function EditUserAuth() {
     overflow:'auto',
     padding:'20px'
   };
-
-
-  let [refresh,setRefresh] = useState(false);
 
   //========================================================== [변수, 객체 선언][useNaviagte]
   let navigate = useNavigate()
@@ -76,6 +146,17 @@ function EditUserAuth() {
     myInfo()
   },[]);
 
+  async function LoginCheck(){
+    let checkResult = await LoginSessionCheck("check",{})
+    if(checkResult.expireTime==0){
+      dispatch(setLoginExpireTime(0))
+      navigate('/login')
+    }
+    else{
+      dispatch(setLoginExpireTime(checkResult.expireTime))
+    }
+  }
+
   //========================================================== [함수][권한] 권한 점검
   function authCheck(){
     if(cookies.load('loginStat')){
@@ -86,6 +167,14 @@ function EditUserAuth() {
         navigate('/')
     }
   }
+
+  async function formPut(qryBody){
+    let ajaxData = await axios.put("/changepwself",qryBody)
+    .then((res)=>res.data)
+    .catch((err)=>err)
+    return ajaxData
+  }
+
 
 
   return (
@@ -130,10 +219,129 @@ function EditUserAuth() {
           </Stack>
         </Paper>
         <Paper style={{width:'75%', padding:'20px', marginLeft:'10px',marginRight:'10px'}} elevation={3}>
-              <div>aa</div>
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={value} onChange={handleChange} variant="scrollable" scrollButtons="auto" aria-label="My Page Tabs">
+                <Tab icon={<LockResetIcon/>} label="비밀번호 변경" {...a11yProps(0)} />
+              </Tabs>
+            </Box>
+            <TabPanel value={value} index={0}>
+              <div className="content-middle" >
+                <Formik
+                  validationSchema={changePwSchema}
+                  onSubmit={async (values, {resetForm})=>{
+                    let qryBody = {
+                      before_user_pw:values.before_user_pw,
+                      after_user_pw:values.after_user_pw,
+                      user_account:initMyInfo.user_account,
+                      update_by:cookies.load('userInfo').user_account
+                    }
+                    setIsSubmitting(true);
+                    let ajaxResult=await formPut(qryBody)
+                    if(ajaxResult.success){
+                      alert("비밀번호가 변경되었습니다.")
+                    }
+                    else{
+                      alert(ajaxResult.result)
+                    }
+                    resetForm()
+                    setIsSubmitting(false);
+                    LoginCheck()
+                  }}
+                  initialValues={{
+                    before_user_pw:'',
+                    after_user_pw:'',
+                    after_user_pw_check:'',
+                  }}
+                >
+                {({
+                  handleSubmit,
+                  handleChange,
+                  handleBlur,
+                  validateField,
+                  values,
+                  touched,
+                  resetForm,
+                  isValid,
+                  errors,
+                })=>(
+                  <div style={{alignItems:"center", textAlign:"center"}}>
+                    <Stack spacing={2}>
+                      <Box
+                      id="chagePwForm"
+                      component="form"
+                      sx={{ width: 500, display: 'flex', flexWrap: 'wrap' }}
+                      noValidate
+                      onSubmit={handleSubmit}
+                      autoComplete="off"
+                      >
+                        <TextField
+                          required
+                          variant="standard"
+                          id="before_user_pw"
+                          type="password"
+                          name="before_user_pw"
+                          label="Current Password"
+                          value={values.before_user_pw}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          helperText={touched.before_user_pw ? errors.before_user_pw: ""}
+                          error={touched.before_user_pw && Boolean(errors.before_user_pw)}
+                          margin="dense"
+                          fullWidth
+                        />
+                        <TextField
+                          required
+                          variant="standard"
+                          id="after_user_pw"
+                          type="password"
+                          name="after_user_pw"
+                          label="New Password"
+                          value={values.after_user_pw}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          helperText={touched.after_user_pw ? errors.after_user_pw : ""}
+                          error={touched.after_user_pw && Boolean(errors.after_user_pw)}
+                          margin="dense"
+                          fullWidth
+                        />
+                        <TextField
+                          required
+                          variant="standard"
+                          id="after_user_pw_check"
+                          type="password"
+                          name="after_user_pw_check"
+                          label="New Password Check"
+                          value={values.after_user_pw_check}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          helperText={touched.after_user_pw_check ? errors.after_user_pw_check : ""}
+                          error={touched.after_user_pw_check && Boolean(errors.after_user_pw_check)}
+                          margin="dense"
+                          fullWidth
+                        />
+                      </Box>
+                      <div className='content-middle'>
+                        <Stack spacing={2} direction="row">
+                          <Button variant="contained" type="submit" form="chagePwForm" disabled={isSubmitting}>Submit</Button>
+                          <Button variant="outlined" type="reset" disabled={isResetting} onClick={async ()=>{
+                            setIsResetting(true)
+                            resetForm()
+                            setIsResetting(false)
+                            LoginCheck()
+                            }}>Reset</Button>
+                        </Stack>
+                      </div>
+                    </Stack>
+                  </div>
+                )}
+                </Formik>
+              </div>
+            </TabPanel>
+          </Box>
         </Paper>
       </Stack>
   );
 }
 
-export default EditUserAuth
+export default MyPage

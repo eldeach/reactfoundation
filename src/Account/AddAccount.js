@@ -15,9 +15,17 @@ import * as yup from 'yup';
 import axios from 'axios';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
+//========================================================== Slide Popup 컴포넌트 & Redux import
+import { useDispatch, useSelector } from "react-redux"
+import { setLoginExpireTime } from "./../store.js"
+//========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
+import LoginSessionCheck from './LoginSessionCheck.js';
 
 
 function AddAccount() {
+  //========================================================== [변수, 객체 선언] 선택된 정보 redux 저장용
+  let rdx = useSelector((state) => { return state } )
+  let dispatch = useDispatch();
   //========================================================== useNaviagte 선언
   let navigate = useNavigate()
 
@@ -54,6 +62,10 @@ function AddAccount() {
     ),
     user_pw: yup.string()
     .required('비밀번호를 입력해주세요.')
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+      "패스워드는 최소 한개의 대문자, 소문자, 숫자 및 특수문자가 포함되어야 하며 8자리 이상이어야 합니다."
+    )
     .test(
         'useraccount_blank_check',
         "공백은 없어야 합니다.",
@@ -80,6 +92,17 @@ function AddAccount() {
     // 이 페이지의 권한 유무 확인
     authCheck()
   },[]);
+
+  async function LoginCheck(){
+    let checkResult = await LoginSessionCheck("check",{})
+    if(checkResult.expireTime==0){
+      dispatch(setLoginExpireTime(0))
+      navigate('/login')
+    }
+    else{
+      dispatch(setLoginExpireTime(checkResult.expireTime))
+    }
+  }
 
   function authCheck(){
     if(cookies.load('loginStat')){
@@ -129,6 +152,7 @@ function AddAccount() {
             await formPost(qryBody)
             resetForm()
             setIsSubmitting(false);
+            LoginCheck()
           }}
           initialValues={{
             user_account: '',
@@ -200,6 +224,7 @@ function AddAccount() {
                   await new Promise((r) => setTimeout(r, 1000));
                   validateField('user_account')
                   setIsIdConfirming(uniqueId=>false)
+                  LoginCheck()
                 }}>Confirm</Button>
 
                 <TextField
@@ -349,6 +374,7 @@ function AddAccount() {
                     setIsResetting(true)
                     resetForm()
                     setIsResetting(false)
+                    LoginCheck()
                     }}>Reset</Button>
                 </Stack>
               </div>

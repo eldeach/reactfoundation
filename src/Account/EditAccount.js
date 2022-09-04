@@ -15,9 +15,17 @@ import * as yup from 'yup';
 import axios from 'axios';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
+//========================================================== Slide Popup 컴포넌트 & Redux import
+import { useDispatch, useSelector } from "react-redux"
+import { setLoginExpireTime } from "./../store.js"
+//========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
+import LoginSessionCheck from './LoginSessionCheck.js';
 
 
 function EditAccount() {
+  //========================================================== [변수, 객체 선언] 선택된 정보 redux 저장용
+  let rdx = useSelector((state) => { return state } )
+  let dispatch = useDispatch();
   //========================================================== useNaviagte 선언
   let navigate = useNavigate()
 
@@ -48,6 +56,17 @@ function EditAccount() {
     // 이 페이지의 권한 유무 확인
     authCheck()
   },[]);
+
+  async function LoginCheck(){
+    let checkResult = await LoginSessionCheck("check",{})
+    if(checkResult.expireTime==0){
+      dispatch(setLoginExpireTime(0))
+      navigate('/login')
+    }
+    else{
+      dispatch(setLoginExpireTime(checkResult.expireTime))
+    }
+  }
 
   function authCheck(){
     if(cookies.load('loginStat')){
@@ -96,6 +115,7 @@ function EditAccount() {
             await formPut(qryBody)
             resetForm()
             setIsSubmitting(false);
+            LoginCheck()
             navigate('/mngaccount')
           }}
           initialValues={{
@@ -181,6 +201,7 @@ function EditAccount() {
                   else{
                     alert("Password는 공백이 없어야 합니다.")
                   }
+                  LoginCheck()
                   }}>Reset</Button> 
 
                 <TextField
@@ -312,8 +333,10 @@ function EditAccount() {
                     setIsResetting(true)
                     resetForm()
                     setIsResetting(false)
+                    LoginCheck()
                     }}>Reset</Button>
                   <Button variant="outlined" onClick={()=>{
+                    LoginCheck()
                     navigate(-1)
                   }}>Cancel</Button>
                 </Stack>

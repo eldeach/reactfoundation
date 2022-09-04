@@ -1,7 +1,7 @@
 import './App.css';
 //========================================================== React 라이브러리 import
 import { useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
 //========================================================== Material UI 라이브러리 import
 import {AppBar, Divider, Box, Toolbar, Typography, Button, IconButton, Drawer, ListItemButton, ListItemIcon, ListItemText, ListItem, List} from '@mui/material/';
@@ -16,6 +16,9 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import axios from 'axios';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
+//========================================================== Slide Popup 컴포넌트 & Redux import
+import { useDispatch, useSelector } from "react-redux"
+import { setLoginExpireTime } from "./store.js"
 //========================================================== 라우트할 import
 import UserLogin from './Account/UserLogin';
 import MngAccount from './Account/MngAccount';
@@ -24,10 +27,56 @@ import EditAccount from './Account/EditAccount';
 import EditUserAuth from './Auth/EditUserAuth';
 import AuditTrail from './AuditTrail/AuditTrail'
 import MyPage from './Account/MyPage';
-import MyPage_old from './Account/MyPage_old';
+//========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
+import LoginSessionCheck from './Account/LoginSessionCheck.js';
+import LoginTimer from './Account/LoginTimer';
+
+
+import { createTheme , ThemeProvider} from '@mui/material/styles';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      light: '#6ec6ff',
+      main: '#2196f3',
+      dark: '#0069c0',
+      contrastText: '#fff',
+    },
+    secondary: {
+      light: '#b2fef7',
+      main: '#80cbc4',
+      dark: '#4f9a94',
+      contrastText: '#000000',
+    },
+    loginTimer:{
+      light: '#ffffff',
+      main: '#ffffff',
+      dark: '#ffffff',
+      contrastText: '#ffffff',
+    }
+  },
+});
+
+
 
 
 function App() {
+  //========================================================== [변수, 객체 선언] 선택된 정보 redux 저장용
+  let rdx = useSelector((state) => { return state } )
+  let dispatch = useDispatch();
+  //========================================================== [변수, 객체 선언] useLocation
+
+  async function LoginCheck(){
+    let checkResult = await LoginSessionCheck("check",{})
+    if(checkResult.expireTime==0){
+      dispatch(setLoginExpireTime(0))
+      navigate('/login')
+    }
+    else{
+      dispatch(setLoginExpireTime(checkResult.expireTime))
+    }
+  }
+
   //========================================================== anchor Drawer state 및 변수, 렌더 페이지 선언
   let navigate = useNavigate();
   let [pageName,setPageName]=useState();
@@ -58,7 +107,10 @@ function App() {
     >
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={()=>{navigate("/mypage")}}>
+          <ListItemButton onClick={()=>{
+            LoginCheck()
+            navigate("/mypage")
+            }}>
             <ListItemIcon>
               <AccountCircleIcon /> 
             </ListItemIcon>
@@ -69,7 +121,10 @@ function App() {
       <Divider />
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={()=>{navigate("/addaccount")}}>
+          <ListItemButton onClick={()=>{
+            LoginCheck()
+            navigate("/addaccount")
+            }}>
             <ListItemIcon>
               <PersonAddIcon /> 
             </ListItemIcon>
@@ -77,7 +132,10 @@ function App() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={()=>{navigate("/mngaccount")}}>
+          <ListItemButton onClick={()=>{
+            LoginCheck()
+            navigate("/mngaccount")
+            }}>
             <ListItemIcon>
               <SupervisorAccountIcon /> 
             </ListItemIcon>
@@ -85,7 +143,10 @@ function App() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={()=>{navigate("/edituserauth")}}>
+          <ListItemButton onClick={()=>{
+            LoginCheck()
+            navigate("/edituserauth")
+            }}>
             <ListItemIcon>
               <PostAddIcon /> 
             </ListItemIcon>
@@ -96,7 +157,10 @@ function App() {
       <Divider />
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={()=>{navigate("/audittrail")}}>
+          <ListItemButton onClick={()=>{
+            LoginCheck()
+            navigate("/audittrail")
+            }}>
             <ListItemIcon>
               <ManageSearchIcon /> 
             </ListItemIcon>
@@ -109,53 +173,70 @@ function App() {
 
   return (
     <div>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="fixed">
-          <Toolbar>
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                sx={{ mr: 2 }}
-                onClick={toggleDrawer(anchor, true)}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Drawer
-                anchor={anchor}
-                open={state[anchor]}
-                onClose={toggleDrawer(anchor, false)}
-              >
-                {list(anchor)}
-              </Drawer>
+      <ThemeProvider theme={theme}>
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="fixed">
+            <Toolbar>
+                <IconButton
+                  size="large"
+                  edge="start"
+                  color="inherit"
+                  aria-label="menu"
+                  sx={{ mr: 2 }}
+                  onClick={toggleDrawer(anchor, true)}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Drawer
+                  anchor={anchor}
+                  open={state[anchor]}
+                  onClose={toggleDrawer(anchor, false)}
+                >
+                  {list(anchor)}
+                </Drawer>
 
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              React SPA Foundation
-            </Typography>
-            <Button color="inherit" onClick={()=>{
-              axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
-              cookies.remove('loginStat', {path :'/',})
-              cookies.remove('userInfo', {path :'/',})
-              navigate("/userlogin")}}>{cookies.load('loginStat') ? "LOGOUT" : "LOGIN"}</Button>
-          </Toolbar>
-        </AppBar>
-      </Box>
-      <div style={{height:'70px'}}>Appbar is here</div>
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                React SPA Foundation
+              </Typography>
 
-      <Routes>
-        <Route path='/' element={<div>home</div>}/>
-        <Route path='/addaccount' element={<AddAccount/>}/>
-        <Route path='/mngaccount' element={<MngAccount/>}/>
-        <Route path='/editaccount' element={<EditAccount/>}/>
-        <Route path='/edituserauth' element={<EditUserAuth/>}/>
-        <Route path='/testpage' element={<MyPage_old/>}/>
-        <Route path='/audittrail' element={ <AuditTrail/> }/>
-        <Route path='/mypage' element={ <MyPage />}/>
-        <Route path='/userlogin' element={<UserLogin/>}/>
-        <Route path='/login' element={<UserLogin/>}/>
-      </Routes>
+              {
+                cookies.load('loginStat') ? 
+                <LoginTimer/>
+                :null
+              }
+              {
+                cookies.load('loginStat') ? 
+                <Button style={{marginLeft:'6px'}} size="small" color="inherit" onClick={()=>{
+                  LoginCheck()
+                }}>Extend Login</Button>
+                :null
+              }
+              
+              <Button style={{marginLeft:'6px'}} size="small" color="inherit" onClick={()=>{
+                axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
+                cookies.remove('loginStat', {path :'/',})
+                cookies.remove('userInfo', {path :'/',})
+                dispatch(setLoginExpireTime(0))
+                navigate("/userlogin")
+                }}>{cookies.load('loginStat') ? "LOGOUT" : "LOGIN"}</Button>
+            </Toolbar>
+          </AppBar>
+        </Box>
+        <div style={{height:'70px'}}>Appbar is here</div>
 
+        <Routes>
+          <Route path='/' element={<div>home</div>}/>
+          <Route path='/addaccount' element={<AddAccount/>}/>
+          <Route path='/mngaccount' element={<MngAccount/>}/>
+          <Route path='/editaccount' element={<EditAccount/>}/>
+          <Route path='/edituserauth' element={<EditUserAuth/>}/>
+          <Route path='/audittrail' element={ <AuditTrail/> }/>
+          <Route path='/mypage' element={ <MyPage />}/>
+          <Route path='/userlogin' element={<UserLogin/>}/>
+          <Route path='/login' element={<UserLogin/>}/>
+        </Routes>
+
+      </ThemeProvider>
     </div>
   );
 }
