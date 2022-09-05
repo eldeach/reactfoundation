@@ -24,7 +24,7 @@ import UserLogin from './Account/UserLogin';
 import MngAccount from './Account/MngAccount';
 import AddAccount from './Account/AddAccount';
 import EditAccount from './Account/EditAccount';
-import EditUserAuth from './Auth/EditUserAuth';
+import MngUserAuth from './Auth/MngUserAuth';
 import AuditTrail from './AuditTrail/AuditTrail'
 import MyPage from './Account/MyPage';
 //========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
@@ -145,12 +145,12 @@ function App() {
         <ListItem disablePadding>
           <ListItemButton onClick={()=>{
             LoginCheck()
-            navigate("/edituserauth")
+            navigate("/mnguserauth")
             }}>
             <ListItemIcon>
               <PostAddIcon /> 
             </ListItemIcon>
-            <ListItemText primary={"권한부여"} />
+            <ListItemText primary={"유저권한관리"} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -229,7 +229,7 @@ function App() {
           <Route path='/addaccount' element={<AddAccount/>}/>
           <Route path='/mngaccount' element={<MngAccount/>}/>
           <Route path='/editaccount' element={<EditAccount/>}/>
-          <Route path='/edituserauth' element={<EditUserAuth/>}/>
+          <Route path='/Mnguserauth' element={<MngUserAuth/>}/>
           <Route path='/audittrail' element={ <AuditTrail/> }/>
           <Route path='/mypage' element={ <MyPage />}/>
           <Route path='/userlogin' element={<UserLogin/>}/>

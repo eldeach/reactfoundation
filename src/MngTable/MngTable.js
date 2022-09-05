@@ -14,6 +14,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import CheckIcon from '@mui/icons-material/Check';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 //========================================================== Formik & Yup 라이브러리 import
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -31,6 +33,9 @@ import { setSel_tb_user, setLoginExpireTime} from "./../store.js"
 import LoginSessionCheck from './../Account/LoginSessionCheck.js';
 
 function MngTable(props) {
+//========================================================== [Backdrop] 모달 열기/닫기 및 스타일 정의
+  let [openBackDrop, setOpenBackDrop] = useState(false);
+  let [openModalBackDrop,setOpenModalBackDrop] = useState(false);
   //========================================================== [Modal] 모달 열기/닫기 및 스타일 정의
   let [openModal, setOpenModal] = useState(false);
   let handleModalOpen = () => {
@@ -51,6 +56,7 @@ function MngTable(props) {
     padding:'20px'
   };
 
+  let [isModalSubmitting,setIsModalSubmitting] = useState(false);
   //========================================================== [변수, 객체 선언][useNaviagte]
   let navigate = useNavigate()
 
@@ -232,6 +238,7 @@ function MngTable(props) {
       <Formik
         validationSchema={schema}
         onSubmit={async (values, {resetForm})=>{
+          setOpenBackDrop(true)
           let para = {
             searchKeyWord: values.searchKeyWord,
           }
@@ -241,6 +248,7 @@ function MngTable(props) {
           setRows(tempData.tempRow)
           resetForm()
           setIsSubmitting(false);
+          setOpenBackDrop(false)
           // LoginCheck()
         }}
         initialValues={{
@@ -392,6 +400,8 @@ function MngTable(props) {
           <Formik
           validationSchema={paperschema}
           onSubmit={async (values)=>{
+            setIsModalSubmitting(true)
+            setOpenModalBackDrop(true)
             let user_sign =  await axios({
               method:"get",
               url:"/signpw",
@@ -428,11 +438,14 @@ function MngTable(props) {
                   InitializeTbl ()
                   setDelRowBt(addRowBt=>false)
                 }
-                
+                setOpenModalBackDrop(false)
+                setIsModalSubmitting(false)
                 handleModalClose()
               }
               else{
                 alert(user_sign.msg)
+                setOpenModalBackDrop(false)
+                setIsModalSubmitting(false)
               }
               LoginCheck()
           }}
@@ -500,14 +513,28 @@ function MngTable(props) {
                     />
                 </div>
                 <div style={{paddingTop:'20px',}}>
-                  <Button size="small" variant="contained" type="submit" form='userSignForm'>Confirm</Button>
+                  <Button size="small" variant="contained" type="submit" form='userSignForm' disabled={isModalSubmitting}>Confirm</Button>
                 </div>
               </div>
             </Box>
           )}
           </Formik>
+            <Backdrop
+            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={openModalBackDrop}
+            // onClick={handleClose}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </Paper>
       </Modal>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openBackDrop}
+        // onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
   

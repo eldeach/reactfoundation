@@ -70,11 +70,11 @@ function EditAccount() {
 
   function authCheck(){
     if(cookies.load('loginStat')){
-      if(cookies.load('userInfo').user_auth.indexOf("EDIT_ACCOUNT",0)!=-1){
+      if(cookies.load('userInfo').user_auth.indexOf("MNG_ACCOUNT",0)!=-1){
 
       }
       else{
-          alert("EDIT_ACCOUNT 권한이 없습니다.")
+          alert("MNG_ACCOUNT 권한이 없습니다.")
           navigate('/')
       }
 

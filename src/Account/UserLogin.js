@@ -8,6 +8,8 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import LockIcon from '@mui/icons-material/Lock';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 //========================================================== Formik & Yup 라이브러리 import
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -26,6 +28,8 @@ import LoginSessionCheck from './LoginSessionCheck.js';
 
 
 function UserLogin() {
+  //========================================================== [Backdrop] 모달 열기/닫기 및 스타일 정의
+  let [openBackDrop, setOpenBackDrop] = useState(false);
   //========================================================== [변수, 객체 선언] 선택된 정보 redux 저장용
   let rdx = useSelector((state) => { return state } )
   let dispatch = useDispatch();
@@ -84,6 +88,7 @@ function UserLogin() {
         <Formik
           validationSchema={schema}
           onSubmit={async (values, {resetForm})=>{
+            setOpenBackDrop(true)
             let qryBody = {
               id: values.user_account,
               pw:values.user_pw
@@ -92,6 +97,7 @@ function UserLogin() {
             await LoginCheck(qryBody)
             resetForm()
             setIsSubmitting(false);
+            setOpenBackDrop(false)
           }}
           initialValues={{
             user_account: '',
@@ -171,6 +177,13 @@ function UserLogin() {
             </div>
         )}
         </Formik>
+        <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openBackDrop}
+        // onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       </div>     
   );
 }

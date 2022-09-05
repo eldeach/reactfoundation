@@ -20,7 +20,7 @@ import MngTable from './../MngTable/MngTable'
 //========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
 import LoginSessionCheck from './../Account/LoginSessionCheck.js';
 
-function EditUserAuth() {
+function MngUserAuth() {
   //========================================================== [Tab] Tab 관련 함수 및 state 정의
   function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -109,11 +109,11 @@ function EditUserAuth() {
   //========================================================== [함수][권한] 권한 점검
   function authCheck(){
     if(cookies.load('loginStat')){
-      if(cookies.load('userInfo').user_auth.indexOf("EDIT_USER_AUTH",0)!=-1){
+      if(cookies.load('userInfo').user_auth.indexOf("MNG_USER_AUTH",0)!=-1){
 
       }
       else{
-          alert("EDIT_USER_AUTH 권한이 없습니다.")
+          alert("MNG_USER_AUTH 권한이 없습니다.")
           navigate('/')
       }
 
@@ -222,4 +222,4 @@ function EditUserAuth() {
   );
 }
 
-export default EditUserAuth
+export default MngUserAuth
