@@ -34,7 +34,7 @@ function AuditTrail(){
   }
     return(
         <div>
-            <MngTable getUrlStr={'/getaudittrail'} targetPk={{}} heightValue={700} chkSel={true} deleteButton={false} addToListButton={false} editable={false} selectButton={false}/>
+            <MngTable getUrlStr={'/getaudittrail'} targetPk={{}} heightValue={'76vh'} chkSel={true} deleteButton={false} addToListButton={false} editable={false} selectButton={false}/>
         </div>
 
     )

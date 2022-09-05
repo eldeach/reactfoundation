@@ -123,13 +123,24 @@ h1{
   }
 
   .info-item{
-    width: 100px;
+    overflow-y: auto;
+    font-size: 1vw;
+    width: 8vw;
+    height: 6vh;
+    display: flex;
+    align-items : center;
+    overflow-wrap: break-word;
   }
 
   .info-item-content{
     overflow-y: auto;
+    font-size: 1vw;
     width: 300px;
-    max-height: 200px;
+    height: 6vh;
+    display: flex;
+    justify-content: center;
+    align-items : center;
+    align-content : center;
     overflow-wrap: break-word;
   }
 
@@ -139,3 +150,18 @@ h1{
     max-height: 200px;
     overflow-wrap: break-word;
   }
+
+
+  .fontbig {
+    font-size: 1.4vw;
+  }
+  
+  .fontnormal {
+    font-size: 1vw;
+  }
+
+  
+  .fontsmall {
+    font-size: 0.6vw;
+  }
+  

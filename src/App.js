@@ -30,6 +30,8 @@ import MyPage from './Account/MyPage';
 //========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
 import LoginSessionCheck from './Account/LoginSessionCheck.js';
 import LoginTimer from './Account/LoginTimer';
+//========================================================== 반응형 웹
+import { BrowserView, MobileView } from 'react-device-detect';
 
 
 import { createTheme , ThemeProvider} from '@mui/material/styles';
@@ -174,67 +176,67 @@ function App() {
   return (
     <div>
       <ThemeProvider theme={theme}>
-        <Box sx={{ flexGrow: 1 }}>
-          <AppBar position="fixed">
-            <Toolbar>
-                <IconButton
-                  size="large"
-                  edge="start"
-                  color="inherit"
-                  aria-label="menu"
-                  sx={{ mr: 2 }}
-                  onClick={toggleDrawer(anchor, true)}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Drawer
-                  anchor={anchor}
-                  open={state[anchor]}
-                  onClose={toggleDrawer(anchor, false)}
-                >
-                  {list(anchor)}
-                </Drawer>
+          <Box sx={{ flexGrow: 1 }}>
+            <AppBar position="fixed">
+              <Toolbar>
+                  <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 2 }}
+                    onClick={toggleDrawer(anchor, true)}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Drawer
+                    anchor={anchor}
+                    open={state[anchor]}
+                    onClose={toggleDrawer(anchor, false)}
+                  >
+                    {list(anchor)}
+                  </Drawer>
 
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                React SPA Foundation
-              </Typography>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                  React SPA Foundation
+                </Typography>
 
-              {
-                cookies.load('loginStat') ? 
-                <LoginTimer/>
-                :null
-              }
-              {
-                cookies.load('loginStat') ? 
+                {
+                  cookies.load('loginStat') ? 
+                  <LoginTimer/>
+                  :null
+                }
+                {
+                  cookies.load('loginStat') ? 
+                  <Button style={{marginLeft:'6px'}} size="small" color="inherit" onClick={()=>{
+                    LoginCheck()
+                  }}>Extend Login</Button>
+                  :null
+                }
+                
                 <Button style={{marginLeft:'6px'}} size="small" color="inherit" onClick={()=>{
-                  LoginCheck()
-                }}>Extend Login</Button>
-                :null
-              }
-              
-              <Button style={{marginLeft:'6px'}} size="small" color="inherit" onClick={()=>{
-                axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
-                cookies.remove('loginStat', {path :'/',})
-                cookies.remove('userInfo', {path :'/',})
-                dispatch(setLoginExpireTime(0))
-                navigate("/userlogin")
-                }}>{cookies.load('loginStat') ? "LOGOUT" : "LOGIN"}</Button>
-            </Toolbar>
-          </AppBar>
-        </Box>
-        <div style={{height:'70px'}}>Appbar is here</div>
+                  axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
+                  cookies.remove('loginStat', {path :'/',})
+                  cookies.remove('userInfo', {path :'/',})
+                  dispatch(setLoginExpireTime(0))
+                  navigate("/userlogin")
+                  }}>{cookies.load('loginStat') ? "LOGOUT" : "LOGIN"}</Button>
+              </Toolbar>
+            </AppBar>
+          </Box>
+          <div style={{height:'70px'}}>Appbar is here</div>
 
-        <Routes>
-          <Route path='/' element={<div>home</div>}/>
-          <Route path='/addaccount' element={<AddAccount/>}/>
-          <Route path='/mngaccount' element={<MngAccount/>}/>
-          <Route path='/editaccount' element={<EditAccount/>}/>
-          <Route path='/Mnguserauth' element={<MngUserAuth/>}/>
-          <Route path='/audittrail' element={ <AuditTrail/> }/>
-          <Route path='/mypage' element={ <MyPage />}/>
-          <Route path='/userlogin' element={<UserLogin/>}/>
-          <Route path='/login' element={<UserLogin/>}/>
-        </Routes>
+          <Routes>
+            <Route path='/' element={<div>home</div>}/>
+            <Route path='/addaccount' element={<AddAccount/>}/>
+            <Route path='/mngaccount' element={<MngAccount/>}/>
+            <Route path='/editaccount' element={<EditAccount/>}/>
+            <Route path='/Mnguserauth' element={<MngUserAuth/>}/>
+            <Route path='/audittrail' element={ <AuditTrail/> }/>
+            <Route path='/mypage' element={ <MyPage />}/>
+            <Route path='/userlogin' element={<UserLogin/>}/>
+            <Route path='/login' element={<UserLogin/>}/>
+          </Routes>
 
       </ThemeProvider>
     </div>

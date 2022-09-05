@@ -126,13 +126,15 @@ function MngUserAuth() {
 
   return (
       <Stack style={{padding:'10px'}} direction='row' spacing={2}>
-        <Paper style={{width:'25%', height:'650px',  padding:'20px', marginLeft:'10px',marginRight:'10px'}} elevation={3}>
-          <Stack spacing={5}>
+        <Paper style={{width:'25%', padding:'20px', marginLeft:'10px',marginRight:'10px', minHeight:'650px', overflowY:'auto', boxSizing:'border-box'}} elevation={3}>
+          <Stack spacing={2}>
             <div style={{display:'flex', alignContent:'center'}}>
-              <AccountCircleIcon style={{fontSize: "58px",width:"12%"}} fontSize ="inherit" color="primary"/>
-              <div style={{display:'block',  width:"70%"}}>
-                <div style={{fontSize:'30px'}}>{rdx.sel_tb_user.user_name}</div>
-                <div style={{fontSize:'15px'}}>{rdx.sel_tb_user.user_account}</div>
+              <div style={{fontSize:"3.2vw"}}>
+                <AccountCircleIcon fontSize ="inherit" color="primary"/>
+              </div>
+              <div style={{display:'block',  width:"70%", alignContent:'center',paddingLeft:'1vw'}}>
+                <div className="fontbig">{rdx.sel_tb_user.user_name}</div>
+                <div className="fontnormal">{rdx.sel_tb_user.user_account}</div>
               </div>
               <div style={{display: "flex", justifyContent: "flex-end", width:"18%"}}>
                 <Button size="small" variant="contained" onClick={()=>{
@@ -143,32 +145,32 @@ function MngUserAuth() {
                   }}>선택</Button>
               </div>
             </div>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="직책" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>직책</div>
               <div className='info-item-content'>{rdx.sel_tb_user.user_position}</div>
             </Stack>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="팀" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>팀</div>
               <div className='info-item-content'>{rdx.sel_tb_user.user_team}</div>
             </Stack>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="회사" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>회사</div>
               <div className='info-item-content'>{rdx.sel_tb_user.user_company}</div>
             </Stack>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="E-Mail" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>E-Mail</div>
               <div className='info-item-content'>{rdx.sel_tb_user.user_email}</div>
             </Stack>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="전화" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>전화</div>
               <div className='info-item-content'>{rdx.sel_tb_user.user_phone}</div>
             </Stack>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="Remark" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>비고</div>
               <div className='info-item-content'>{rdx.sel_tb_user.remark}</div>
             </Stack>
-            <Stack direction='row' spacing={2} divider={<Divider orientation="vertical" flexItem />}>
-              <Chip className="info-item" label="UUID" color="primary" variant="outlined" />
+            <Stack direction='row' divider={<Divider style={{marginLeft:'1vw',marginRight:'1vw'}} orientation="vertical" flexItem />}>
+              <div className='info-item'>UUID</div>
               <div className='info-item-content'>{rdx.sel_tb_user.uuid_binary}</div>
             </Stack>
             <Button size="small" variant="contained" onClick={async ()=>{
@@ -177,7 +179,7 @@ function MngUserAuth() {
               }}>Confirm</Button>
           </Stack>
         </Paper>
-        <Paper style={{width:'75%', padding:'20px', marginLeft:'10px',marginRight:'10px'}} elevation={3}>
+        <Paper style={{width:'75%', padding:'20px', marginLeft:'10px',marginRight:'10px', minHeight:'650px', overflowY:'auto', boxSizing:'border-box'}} elevation={3}>
           <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={value} onChange={handleChange} variant="scrollable" scrollButtons="auto" aria-label="My Page Tabs">
