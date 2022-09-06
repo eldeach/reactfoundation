@@ -32,9 +32,12 @@ import LoginSessionCheck from './Account/LoginSessionCheck.js';
 import LoginTimer from './Account/LoginTimer';
 //========================================================== 반응형 웹
 import { BrowserView, MobileView } from 'react-device-detect';
+//========================================================== before unload 라이브러리 import
+import { useBeforeunload } from 'react-beforeunload';
 
 
 import { createTheme , ThemeProvider} from '@mui/material/styles';
+import { FunctionsTwoTone } from '@mui/icons-material';
 
 const theme = createTheme({
   palette: {
@@ -61,8 +64,26 @@ const theme = createTheme({
 
 
 
-
 function App() {
+
+  window.addEventListener('unload', (e)=>{
+    axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
+    cookies.remove('loginStat', {path :'/',})
+    cookies.remove('userInfo', {path :'/',})
+    dispatch(setLoginExpireTime(0))
+  });
+  
+  // const {enablePrevent, disablePrevent} = usePreventLeave();
+
+  // useBeforeunload((event) => {
+  //   // axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
+  //   // cookies.remove('loginStat', {path :'/',})
+  //   // cookies.remove('userInfo', {path :'/',})
+  //   // dispatch(setLoginExpireTime(0))
+  //   console.log()
+  //   let a=event.preventDefault();
+    
+  // });
   //========================================================== [변수, 객체 선언] 선택된 정보 redux 저장용
   let rdx = useSelector((state) => { return state } )
   let dispatch = useDispatch();
@@ -215,11 +236,16 @@ function App() {
                 }
                 
                 <Button style={{marginLeft:'6px'}} size="small" color="inherit" onClick={()=>{
-                  axios.get("/logout").then((res)=>{}).catch((err)=>console.log(err))
-                  cookies.remove('loginStat', {path :'/',})
-                  cookies.remove('userInfo', {path :'/',})
-                  dispatch(setLoginExpireTime(0))
-                  navigate("/userlogin")
+                  axios.get("/logout")
+                  .then((res)=>{
+                    cookies.remove('loginStat', {path :'/',})
+                    cookies.remove('userInfo', {path :'/',})
+                    dispatch(setLoginExpireTime(0))
+                    navigate("/userlogin")
+                  })
+                  .catch((err)=>{
+                    console.log(err)
+                  })
                   }}>{cookies.load('loginStat') ? "LOGOUT" : "LOGIN"}</Button>
               </Toolbar>
             </AppBar>

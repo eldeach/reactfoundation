@@ -119,7 +119,6 @@ function MyPage() {
   let [initMyInfo,setInitMyInfo]=useState({})
   async function myInfo(){
     if(cookies.load('loginStat')){
-    let ajaxStat
     let ajaxData = await axios({
       method:"get",
       url:"/getmypage",
@@ -128,14 +127,13 @@ function MyPage() {
           'Content-Type':'application/json'
       }})
       .then((res)=>{
-        ajaxStat=res.data.success
         setInitMyInfo(res.data.result[0])
-        return res.data.result[0]
+        return res.data
       })
       .catch((err)=>console.log(err))
     // get URL 및 params 가변 코드 라인 끝
     
-    if(!ajaxStat) alert("테이블 정보 조회를 실패했습니다.")
+    if(!ajaxData.success) alert("내 정보 조회를 실패했습니다.")
     }
   }
 
@@ -173,7 +171,9 @@ function MyPage() {
   async function formPut(qryBody){
     let ajaxData = await axios.put("/changepwself",qryBody)
     .then((res)=>res.data)
-    .catch((err)=>err)
+    .catch((err)=>{
+      console.log(err)
+    })
     return ajaxData
   }
 
@@ -274,56 +274,58 @@ function MyPage() {
                     <Box
                     id="chagePwForm"
                     component="form"
-                    sx={{ width: '100%', display: 'flex', flexWrap: 'wrap' }}
+                    sx={{ width: '100%', display: 'flex', flexWrap: 'wrap',justifyContent:'center' }}
                     noValidate
                     onSubmit={handleSubmit}
                     autoComplete="off"
                     >
-                      <TextField
-                        required
-                        variant="standard"
-                        id="before_user_pw"
-                        type="password"
-                        name="before_user_pw"
-                        label="Current Password"
-                        value={values.before_user_pw}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        helperText={touched.before_user_pw ? errors.before_user_pw: ""}
-                        error={touched.before_user_pw && Boolean(errors.before_user_pw)}
-                        margin="dense"
-                        fullWidth
-                      />
-                      <TextField
-                        required
-                        variant="standard"
-                        id="after_user_pw"
-                        type="password"
-                        name="after_user_pw"
-                        label="New Password"
-                        value={values.after_user_pw}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        helperText={touched.after_user_pw ? errors.after_user_pw : ""}
-                        error={touched.after_user_pw && Boolean(errors.after_user_pw)}
-                        margin="dense"
-                        fullWidth
-                      />
-                      <TextField
-                        required
-                        variant="standard"
-                        id="after_user_pw_check"
-                        type="password"
-                        name="after_user_pw_check"
-                        label="New Password Check"
-                        value={values.after_user_pw_check}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        helperText={touched.after_user_pw_check ? errors.after_user_pw_check : ""}
-                        error={touched.after_user_pw_check && Boolean(errors.after_user_pw_check)}
-                        margin="dense"
-                        fullWidth
-                      />
+                      <div style={{width:'40vw',display:'block'}}>
+                        <TextField
+                          required
+                          variant="standard"
+                          id="before_user_pw"
+                          type="password"
+                          name="before_user_pw"
+                          label="Current Password"
+                          value={values.before_user_pw}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          helperText={touched.before_user_pw ? errors.before_user_pw: ""}
+                          error={touched.before_user_pw && Boolean(errors.before_user_pw)}
+                          margin="dense"
+                          fullWidth
+                        />
+                        <TextField
+                          required
+                          variant="standard"
+                          id="after_user_pw"
+                          type="password"
+                          name="after_user_pw"
+                          label="New Password"
+                          value={values.after_user_pw}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          helperText={touched.after_user_pw ? errors.after_user_pw : ""}
+                          error={touched.after_user_pw && Boolean(errors.after_user_pw)}
+                          margin="dense"
+                          fullWidth
+                        />
+                        <TextField
+                          required
+                          variant="standard"
+                          id="after_user_pw_check"
+                          type="password"
+                          name="after_user_pw_check"
+                          label="New Password Check"
+                          value={values.after_user_pw_check}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          helperText={touched.after_user_pw_check ? errors.after_user_pw_check : ""}
+                          error={touched.after_user_pw_check && Boolean(errors.after_user_pw_check)}
+                          margin="dense"
+                          fullWidth
+                        />
+                      </div>
                     </Box>
                     <div className='content-middle'>
                       <Stack spacing={2} direction="row">

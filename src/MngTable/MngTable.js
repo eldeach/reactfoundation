@@ -153,7 +153,6 @@ function MngTable(props) {
       }
     }
 
-    let ajaxStat
     let ajaxData = await axios({
       method:"get",
       url:props.getUrlStr,
@@ -162,8 +161,7 @@ function MngTable(props) {
           'Content-Type':'application/json'
       }})
       .then((res)=>{
-        ajaxStat=res.data.success
-        return res.data.result
+        return res.data
       })
       .catch((err)=>console.log(err))
     // get URL 및 params 가변 코드 라인 끝
@@ -171,14 +169,14 @@ function MngTable(props) {
     let tempCol=[]
     let tempRow =[]
     
-    if(!ajaxStat){console.log("테이블 정보 조회를 실패했습니다.")
-
+    if(!ajaxData.success){
+      console.log("테이블 정보 조회를 실패했습니다.")
     }
     else{
       // 컬럼 및 행 데이터 분류 시작
-      if (ajaxData.length>0) // (조회된 데이터가 있는 경우에만 작동)
+      if (ajaxData.result.length>0) // (조회된 데이터가 있는 경우에만 작동)
       {    
-        Object.keys(ajaxData[0]).map((columName,i)=>{
+        Object.keys(ajaxData.result[0]).map((columName,i)=>{
           let tempMinWidth = columName.length*14
           if(columName=="remark") tempMinWidth= 200
           if(columName=="uuid_binary") tempMinWidth= 200
@@ -206,7 +204,7 @@ function MngTable(props) {
           })
         }
 
-        ajaxData.map((oneRow,i)=>{ //ajax 데이터 중 datetime 값을 한국시간으로 변경
+        ajaxData.result.map((oneRow,i)=>{ //ajax 데이터 중 datetime 값을 한국시간으로 변경
             let tempObjs = oneRow
             tempObjs["id"]=(i+1)
             tempObjs["action_datetime"] = moment(new Date(tempObjs["action_datetime"])).format('YYYY-MM-DD HH:mm:ss');
@@ -413,7 +411,7 @@ function MngTable(props) {
                 'Content-Type':'application/json'
               }})
               .then((res)=>res.data)
-              .catch((err)=>alert(err))
+              .catch((err)=>console.log(err))
 
               if(user_sign.signStat){
                 alert(user_sign.msg)
@@ -446,6 +444,7 @@ function MngTable(props) {
                 alert(user_sign.msg)
                 setOpenModalBackDrop(false)
                 setIsModalSubmitting(false)
+                handleModalClose()
               }
               LoginCheck()
           }}
@@ -564,7 +563,7 @@ async function DeleteUserAuth(pickRows, targetUser){
       'Content-Type':'application/json'
     }})
     .then((res)=>res.data)
-    .catch((err)=>err)
+    .catch((err)=>console.log(err))
     return ajaxData
 }
 
@@ -579,7 +578,7 @@ async function AddUserAuth(pickRows, targetUser){
   }
   let ajaxData = await axios.post("/edituserauth_adduserauth",body)
   .then((res)=>res.data)
-  .catch((err)=>err)
+  .catch((err)=>console.log(err))
   return ajaxData 
 }
 
@@ -598,6 +597,6 @@ async function DeleteOneUser(pickRows){
       'Content-Type':'application/json'
     }})
     .then((res)=>res.data)
-    .catch((err)=>err)
+    .catch((err)=>console.log(err))
     return ajaxData
 }

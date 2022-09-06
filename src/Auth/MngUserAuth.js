@@ -8,8 +8,6 @@ import {PropTypes, Tabs, Tab, Box, Typography, Chip, Button, Stack, Paper,Divide
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import PostAddIcon from '@mui/icons-material/PostAdd';
-//========================================================== axios 라이브러리 import
-import axios from 'axios';
 //========================================================== cookie 라이브러리 import
 import cookies from 'react-cookies'
 //========================================================== Slide Popup 컴포넌트 & Redux import

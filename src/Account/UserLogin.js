@@ -13,16 +13,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 //========================================================== Formik & Yup 라이브러리 import
 import { Formik } from 'formik';
 import * as yup from 'yup';
-//========================================================== axios 라이브러리 import
-import axios from 'axios';
-//========================================================== cookie 라이브러리 import
-import cookies from 'react-cookies'
 //========================================================== Slide Popup 컴포넌트 & Redux import
 import { useDispatch, useSelector } from "react-redux"
 import { setLoginExpireTime } from "./../store.js"
-//========================================================== Moment 라이브러리 import
-import moment from 'moment';
-import 'moment/locale/ko';	//대한민국
 //========================================================== 로그인 세션 확인 및 쿠키 save 컴포넌트 import
 import LoginSessionCheck from './LoginSessionCheck.js';
 

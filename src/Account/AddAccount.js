@@ -124,7 +124,9 @@ function AddAccount() {
   async function formPost(qryBody){
     let ajaxData = await axios.post("/postaddaccount",qryBody)
     .then((res)=>res.data)
-    .catch((err)=>err)
+    .catch((err)=>{
+      console.log(err)
+    })
 
     if(ajaxData.success) return ajaxData.result
     else alert(ajaxData)
@@ -218,9 +220,14 @@ function AddAccount() {
                   let ajaxData=await axios.post('/duplicatedaccountCheck',body)
                   .then((res)=>res.data)
                   .catch((err)=>err)
-
-                  if(ajaxData.result.length<1) setUniqueId(uniqueId=>true)
-                  else setUniqueId(uniqueId=>false)
+                  
+                  if(ajaxData.success){
+                    if(ajaxData.result.length<1) setUniqueId(uniqueId=>true)
+                    else setUniqueId(uniqueId=>false)
+                  }
+                  else{
+                    alert(ajaxData.result)
+                  }
                   await new Promise((r) => setTimeout(r, 1000));
                   validateField('user_account')
                   setIsIdConfirming(uniqueId=>false)

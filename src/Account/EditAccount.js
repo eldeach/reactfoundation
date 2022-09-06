@@ -190,11 +190,11 @@ function EditAccount() {
                 <Button variant="outlined" onClick={async ()=>{
                   if(!values.user_pw.includes(" ")&&!values.user_pw.length==0){
                     let ajaxData = await axios.put("/resetaccountpw",{user_pw:values.user_pw,uuid_binary:values.uuid_binary,user_account:values.user_account, reset_by:cookies.load("userInfo").user_account})
-                    .then((res)=>{return res})
+                    .then((res)=>{return res.data})
                     .catch((err)=>err)
-                    if(ajaxData.data.success) alert("비밀번호가 변경되었습니다.")
+                    if(ajaxData.success) alert("비밀번호가 변경되었습니다.")
                     else {
-                      alert("비밀번호가 변경에 문제가 생겼습니다."+ ajaxData.data)
+                      alert("비밀번호가 변경에 문제가 생겼습니다. ("+ ajaxData.result+")")
                     }
                     navigate('/mngaccount')
                   }

@@ -9,10 +9,10 @@ async function LoginSessionCheck(typeStr,qryBody){
   if(typeStr=="init")
   {
     checkResult = axios.post("/login",qryBody).then(function(res){
-      if (res.data.loginStat){
+      if (res.data.success){
           const expires = new Date()
           expires.setMinutes(expires.getMinutes() + res.data.expireTime)
-          cookies.save('loginStat',res.data.loginStat,{path :'/',
+          cookies.save('loginStat',res.data.success,{path :'/',
             expires:expires,          // 유효 시간
             //secure: true,   // 웹 브라우저와 웹 서버가 https로 통신하는 경우에만 쿠키 저장
             // httpOnly: true  // document.cookie라는 자바스크립트 코드로 쿠키에 비정상적으로 접속하는 것을 막는 옵션
@@ -31,19 +31,23 @@ async function LoginSessionCheck(typeStr,qryBody){
         }
         else if(res.data.flashMsg=="no user_account"){
           return {type:'init', expireTime: 0, flashMsg:res.data.flashMsg}
-        }else if(res.data.flashMsg=="no auth"){
+        }
+        else if(res.data.flashMsg=="no auth"){
           return {type:'init', expireTime: 0, flashMsg:res.data.flashMsg}
         }
       }
-    }).catch((err)=>console.log(err))
+    }).catch((err)=>{
+      console.log(err)
+      return {type:'check', expireTime: 0}
+    })
   }
   else if(typeStr=="check")
   {
     checkResult = await axios.get("/logincheck").then(function(res){
-      if (res.data.loginStat){
+      if (res.data.success){
           const expires = new Date()
           expires.setMinutes(expires.getMinutes() + res.data.expireTime)
-          cookies.save('loginStat',res.data.loginStat,{path :'/',
+          cookies.save('loginStat',res.data.success,{path :'/',
             expires:expires,          // 유효 시간
             //secure: true,   // 웹 브라우저와 웹 서버가 https로 통신하는 경우에만 쿠키 저장
             // httpOnly: true  // document.cookie라는 자바스크립트 코드로 쿠키에 비정상적으로 접속하는 것을 막는 옵션
@@ -61,7 +65,10 @@ async function LoginSessionCheck(typeStr,qryBody){
         cookies.remove('userInfo', {path :'/',})
         return {type:'check', expireTime: 0}
       }
-    }).catch((err)=>console.log(err))
+    }).catch((err)=>{
+      console.log(err)
+      return {type:'check', expireTime: 0}
+    })
   
   }
 
